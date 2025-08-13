@@ -78,7 +78,7 @@ const users = defineEntity({
 
   console.log(allRandys.length);
 
-  const firstPageOfUsers = await users.scan();
+  const firstPageOfUsers = await users.query({ email: "randy@example.com" });
   console.log(firstPageOfUsers.length);
   console.log(firstPageOfUsers[0]?.name);
   const secondPageOfUsers = await firstPageOfUsers.next!();
@@ -95,7 +95,7 @@ const users = defineEntity({
   );
   console.log(randomQuery.length);
 
-  const allUsers = await users.scanAll();
+  const allUsers = await users.queryAll({ email: "someone@example.com" });
   console.log(allUsers.length);
   console.log(allUsers[0]?.name);
 })();

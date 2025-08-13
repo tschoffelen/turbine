@@ -1,6 +1,6 @@
 # Turbine 🪭
 
-Entity mapping and query helpers for DynamoDB using Zod schemas and the AWS SDK v3. Define your table and entities once, then put, get, update, query, and scan with type-safe objects.
+Entity mapping and query helpers for DynamoDB using Zod schemas and the AWS SDK v3. Define your table and entities once, then put, get, update, and query with type-safe objects.
 
 - Small, direct, and type-friendly
 - Derive keys and computed fields from your data
@@ -70,12 +70,6 @@ await users.update({ id: user.id }, { email: "randy@example.com" });
 const byPrimaryKey = await users.get({ id: user.id });
 const one = await users.queryOne({ email: "randy@example.com" });
 const all = await users.queryAll({ email: "randy@example.com" });
-
-// Scans and pagination
-const page1 = await users.scan({ Limit: 25 });
-if (page1.next) {
-  const page2 = await page1.next();
-}
 ```
 
 ## Defining tables
@@ -130,8 +124,6 @@ const user = defineEntity({
 - query(key, options?): chooses an index based on the key shape; pass `IndexName` in options to override. Returns a paged array with `lastEvaluatedKey` and `next()`.
 - queryOne(key, options?): first match or null.
 - queryAll(key, options?): collects all pages for convenience.
-- scan(options?): paged scan.
-- scanAll(options?): collects all pages.
 
 Query options match DynamoDB’s `QueryCommandInput` (minus the expression fields that Turbine builds for you), so you can set things like `Limit`, `ExclusiveStartKey`, `ScanIndexForward`, `ConsistentRead`, etc.
 

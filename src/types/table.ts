@@ -8,8 +8,6 @@ import {
   PutCommandOutput,
   QueryCommandInput,
   QueryCommandOutput,
-  ScanCommandInput,
-  ScanCommandOutput,
   UpdateCommandInput,
   UpdateCommandOutput,
 } from "@aws-sdk/lib-dynamodb";
@@ -46,7 +44,4 @@ export type Table = {
   query: (
     params: Omit<QueryCommandInput, "TableName">,
   ) => Promise<QueryCommandOutput>;
-  scan: (
-    params: Omit<ScanCommandInput, "TableName">,
-  ) => Promise<ScanCommandOutput>;
 };

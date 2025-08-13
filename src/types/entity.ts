@@ -1,4 +1,4 @@
-import { QueryCommandInput, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
+import { QueryCommandInput } from "@aws-sdk/lib-dynamodb";
 import { z } from "zod";
 
 import { KeyDefinition } from "./key";
@@ -24,8 +24,6 @@ export type QueryOptions = Omit<
   | "ExpressionAttributeValues"
 >;
 
-export type ScanOptions = Omit<ScanCommandInput, "TableName">;
-
 export type Entity<D extends EntityDefinition<z.ZodObject>> = {
   definition: D;
   get(key: Partial<z.infer<D["schema"]>>): Promise<EntityInstance<D> | null>;
@@ -41,8 +39,6 @@ export type Entity<D extends EntityDefinition<z.ZodObject>> = {
     key: Partial<z.infer<D["schema"]>>,
     options?: QueryOptions,
   ): Promise<EntityInstance<D>[]>;
-  scan(options?: ScanOptions): Promise<PagedResult<D>>;
-  scanAll(options?: ScanOptions): Promise<EntityInstance<D>[]>;
   put(data: z.infer<D["schema"]>): Promise<EntityInstance<D>>;
   update(
     key: Partial<z.infer<D["schema"]>>,

@@ -91,31 +91,6 @@ export const defineEntity = <S extends z.ZodObject>(
     return items;
   };
 
-  entity.scan = async (options) => {
-    const { Items, LastEvaluatedKey } = await definition.table.scan({
-      ...options,
-    });
-
-    const next = () =>
-      entity.scan({ ExclusiveStartKey: LastEvaluatedKey, ...options });
-
-    return parsePagedResult(definition, entity, Items, LastEvaluatedKey, next);
-  };
-
-  entity.scanAll = async (options) => {
-    let next = () => entity.scan(options);
-
-    const items: any[] = [];
-    while (next) {
-      const result = await next();
-      items.push(...result);
-      if (!result.next) break;
-      next = result.next;
-    }
-
-    return items;
-  };
-
   entity.get = async (key) => {
     const Key = await resolveKey(definition, "table", key);
     const { Item } = await definition.table.get({

@@ -10,8 +10,6 @@ import {
   PutCommandInput,
   QueryCommand,
   QueryCommandInput,
-  ScanCommand,
-  ScanCommandInput,
   UpdateCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 
@@ -69,12 +67,6 @@ export const defineTable = (definition: TableDefinition): Table => {
     );
   };
 
-  const scan = (params: Omit<ScanCommandInput, "TableName">) => {
-    return client.send(
-      new ScanCommand({ ...params, TableName: definition.name }),
-    );
-  };
-
   return {
     client,
     definition,
@@ -83,6 +75,5 @@ export const defineTable = (definition: TableDefinition): Table => {
     get,
     delete: deleteItem,
     query,
-    scan,
   };
 };
