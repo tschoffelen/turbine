@@ -1,4 +1,11 @@
 import {
+  DeleteItemCommand,
+  GetItemCommand,
+  PutItemCommand,
+  UpdateItemCommand,
+} from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb/dist-types/DynamoDBClient";
+import {
   DeleteCommandInput,
   DynamoDBDocumentClient,
   GetCommandInput,
@@ -9,16 +16,9 @@ import {
   ScanCommandInput,
   UpdateCommandInput,
 } from "@aws-sdk/lib-dynamodb";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb/dist-types/DynamoDBClient";
-import {
-  DeleteItemCommand,
-  GetItemCommand,
-  PutItemCommand,
-  UpdateItemCommand,
-} from "@aws-sdk/client-dynamodb";
 
-import { Table, TableDefinition } from "./types/table";
 import { TurbineError } from "./error";
+import { Table, TableDefinition } from "./types/table";
 
 export const defineTable = (definition: TableDefinition): Table => {
   let client: DynamoDBDocumentClient;
@@ -43,37 +43,37 @@ export const defineTable = (definition: TableDefinition): Table => {
 
   const put = (params: Omit<PutCommandInput, "TableName">) => {
     return client.send(
-      new PutItemCommand({ ...params, TableName: definition.name })
+      new PutItemCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const update = (params: Omit<UpdateCommandInput, "TableName">) => {
     return client.send(
-      new UpdateItemCommand({ ...params, TableName: definition.name })
+      new UpdateItemCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const get = (params: Omit<GetCommandInput, "TableName">) => {
     return client.send(
-      new GetItemCommand({ ...params, TableName: definition.name })
+      new GetItemCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const deleteItem = (params: Omit<DeleteCommandInput, "TableName">) => {
     return client.send(
-      new DeleteItemCommand({ ...params, TableName: definition.name })
+      new DeleteItemCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const query = (params: Omit<QueryCommandInput, "TableName">) => {
     return client.send(
-      new QueryCommand({ ...params, TableName: definition.name })
+      new QueryCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const scan = (params: Omit<ScanCommandInput, "TableName">) => {
     return client.send(
-      new ScanCommand({ ...params, TableName: definition.name })
+      new ScanCommand({ ...params, TableName: definition.name }),
     );
   };
 

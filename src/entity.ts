@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { Entity, EntityDefinition } from "./types/entity";
 import { ReturnValue } from "@aws-sdk/client-dynamodb";
+import { z } from "zod";
+
 import {
   generateKeyConditionExpression,
   generateUpdateExpression,
@@ -13,9 +13,10 @@ import {
   parsePagedResult,
   resolveKeyAndIndex,
 } from "./parsing";
+import { Entity, EntityDefinition } from "./types/entity";
 
 export const defineEntity = <S extends z.ZodObject>(
-  definition: EntityDefinition<S>
+  definition: EntityDefinition<S>,
 ): Entity<EntityDefinition<S>> => {
   // @ts-expect-error missing
   const entity: Entity<EntityDefinition<S>> = {};

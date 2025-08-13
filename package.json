@@ -4,11 +4,17 @@
   "type": "module",
   "description": "Entity mapping and query library for DynamoDB",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
+    "lint": "eslint .",
     "test": "yarn test:types && yarn test:unit",
     "test:types": "yarn tsc --noEmit tests/type-checking.ts --esModuleInterop",
-    "test:unit": "jest"
+    "test:unit": "jest",
+    "prepare": "yarn build",
+    "release": "semantic-release"
   },
   "repository": {
     "type": "git",
@@ -33,9 +39,19 @@
     "zod": "^4.0.17"
   },
   "devDependencies": {
+    "@eslint/js": "^9.33.0",
     "@jest/globals": "^30.0.5",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jest": "^29.0.1",
+    "eslint-plugin-no-only-tests": "^3.3.0",
+    "eslint-plugin-prettier": "^5.5.4",
     "jest": "^30.0.5",
+    "prettier": "^3.6.2",
+    "semantic-release": "^24.2.7",
     "ts-jest": "^29.4.1",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.1"
   }
 }

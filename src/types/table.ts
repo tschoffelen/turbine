@@ -32,21 +32,21 @@ export type Table = {
   definition: TableDefinition;
   client: DynamoDBDocumentClient;
   put: (
-    params: Omit<PutCommandInput, "TableName">
+    params: Omit<PutCommandInput, "TableName">,
   ) => Promise<PutCommandOutput>;
   update: (
-    params: Omit<UpdateCommandInput, "TableName">
+    params: Omit<UpdateCommandInput, "TableName">,
   ) => Promise<UpdateCommandOutput>;
   get: (
-    params: Omit<GetCommandInput, "TableName">
+    params: Omit<GetCommandInput, "TableName">,
   ) => Promise<GetCommandOutput>;
   delete: (
-    params: Omit<DeleteCommandInput, "TableName">
+    params: Omit<DeleteCommandInput, "TableName">,
   ) => Promise<DeleteCommandOutput>;
   query: (
-    params: Omit<QueryCommandInput, "TableName">
+    params: Omit<QueryCommandInput, "TableName">,
   ) => Promise<QueryCommandOutput>;
   scan: (
-    params: Omit<ScanCommandInput, "TableName">
+    params: Omit<ScanCommandInput, "TableName">,
   ) => Promise<ScanCommandOutput>;
 };

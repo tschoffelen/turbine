@@ -11,7 +11,7 @@ export const generateAttributeNames = (patch: Record<string, unknown>) => {
 };
 
 export const generateKeyConditionExpression = (
-  key: Record<string, unknown>
+  key: Record<string, unknown>,
 ) => {
   const keyCondition = Object.entries(key)
     .filter(([, value]) => value !== undefined && value !== null)
@@ -27,7 +27,7 @@ export const generateKeyConditionExpression = (
 
 export const generateUpdateExpression = (
   patch: Record<string, unknown>,
-  doNotOverwrite: string[] = []
+  doNotOverwrite: string[] = [],
 ) => {
   const setExpression = Object.entries(patch)
     .filter(([, value]) => value !== undefined && value !== null)

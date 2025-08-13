@@ -1,4 +1,6 @@
 import { z } from "zod";
+
+import { TurbineError } from "./error";
 import {
   Entity,
   EntityDefinition,
@@ -6,17 +8,16 @@ import {
   PagedResult,
 } from "./types/entity";
 import { KeyDefinitionPrimitive } from "./types/key";
-import { TurbineError } from "./error";
 
 export const parsePagedResult = async <D extends EntityDefinition<z.ZodObject>>(
   definition: D,
   entity: Entity<D>,
   items: unknown[] | undefined | null,
   lastEvaluatedKey: Record<string, any> | undefined,
-  next?: () => Promise<PagedResult<D>>
+  next?: () => Promise<PagedResult<D>>,
 ): Promise<PagedResult<D>> => {
   const output: PagedResult<D> = await Promise.all(
-    (items || []).map((item) => parseInstance(definition, entity, item))
+    (items || []).map((item) => parseInstance(definition, entity, item)),
   );
 
   if (lastEvaluatedKey) {
@@ -32,14 +33,14 @@ export const parsePagedResult = async <D extends EntityDefinition<z.ZodObject>>(
 export const resolveKey = async <S extends z.ZodObject>(
   definition: EntityDefinition<S>,
   indexName: string,
-  keyData: Partial<z.infer<S>>
+  keyData: Partial<z.infer<S>>,
 ): Promise<Record<string, unknown>> => {
   const values = await expandPartialPayload(definition, keyData);
 
   const index = definition.table.definition.indexes[indexName];
   if (!index) {
     throw new TurbineError(
-      `Index with name "${indexName}" is not defined in table "${definition.table.definition.name}"`
+      `Index with name "${indexName}" is not defined in table "${definition.table.definition.name}"`,
     );
   }
 
@@ -64,7 +65,7 @@ export const resolveKey = async <S extends z.ZodObject>(
 
 export const resolveKeyAndIndex = async <S extends z.ZodObject>(
   definition: EntityDefinition<S>,
-  keyData: Partial<z.infer<S>>
+  keyData: Partial<z.infer<S>>,
 ): Promise<{ IndexName: string; Key: Record<string, unknown> }> => {
   const { indexes } = definition.table.definition;
 
@@ -72,17 +73,19 @@ export const resolveKeyAndIndex = async <S extends z.ZodObject>(
     try {
       const Key = await resolveKey(definition, IndexName, keyData);
       return { IndexName, Key };
-    } catch (e) {}
+    } catch (_) {
+      // ignore
+    }
   }
 
   throw new TurbineError(
-    `No matching index found for key data: ${JSON.stringify(keyData)}`
+    `No matching index found for key data: ${JSON.stringify(keyData)}`,
   );
 };
 
 export const expandPayload = async <S extends z.ZodObject>(
   definition: EntityDefinition<S>,
-  data: z.infer<S>
+  data: z.infer<S>,
 ): Promise<Partial<z.infer<S>>> => {
   const parsedData = await definition.schema.parseAsync(data);
   return {
@@ -93,7 +96,7 @@ export const expandPayload = async <S extends z.ZodObject>(
 
 export const expandPartialPayload = async <S extends z.ZodObject>(
   definition: EntityDefinition<S>,
-  data: Partial<z.infer<S>>
+  data: Partial<z.infer<S>>,
 ): Promise<Partial<Record<string, KeyDefinitionPrimitive>>> => {
   const parsedData = await definition.schema.partial().parseAsync(data);
   return {
@@ -104,7 +107,7 @@ export const expandPartialPayload = async <S extends z.ZodObject>(
 
 export const parseKeys = <S extends z.ZodObject>(
   definition: EntityDefinition<S>,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Partial<Record<string, KeyDefinitionPrimitive>> => {
   const keys: Partial<Record<string, KeyDefinitionPrimitive>> = {};
   for (const key in definition.keys) {
@@ -120,7 +123,7 @@ export const parseKeys = <S extends z.ZodObject>(
 export const parseInstance = async <D extends EntityDefinition<z.ZodObject>>(
   definition: D,
   entity: Entity<D>,
-  input: unknown
+  input: unknown,
 ): Promise<EntityInstance<D>> => {
   const result = await definition.schema.parseAsync(input);
 

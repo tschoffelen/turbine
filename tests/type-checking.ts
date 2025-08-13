@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { defineTable, defineEntity } from "../src";
 
 const table = defineTable({
@@ -56,7 +57,7 @@ const users = defineEntity({
     },
     {
       email: "randy@example.com",
-    }
+    },
   );
 
   const randy = await users.get({
@@ -90,7 +91,7 @@ const users = defineEntity({
     },
     {
       Limit: 10,
-    }
+    },
   );
   console.log(randomQuery.length);
 
