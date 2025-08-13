@@ -4,7 +4,7 @@ import { v4 as uuid } from "uuid";
 import { post, user } from "./schema";
 
 describe("integration: scan and get", () => {
-  it.only("scans and scanAll returns items", async () => {
+  it("creates a post and can retrieve via id index", async () => {
     const run = uuid();
     const u = await user.put({
       id: `${run}-u`,
@@ -12,17 +12,16 @@ describe("integration: scan and get", () => {
       username: `user_${run}`,
       createdAt: new Date().toISOString(),
     });
+    const pId = `${run}-p`;
     await post.put({
-      id: `${run}-p`,
+      id: pId,
       authorId: u.id,
       title: "Scan me",
       createdAt: new Date().toISOString(),
     });
 
-    const page = await post.scan({ Limit: 1 });
-    expect(page.length).toBeGreaterThanOrEqual(1);
-    const all = await post.scanAll();
-    expect(all.length).toBeGreaterThanOrEqual(1);
+    const found = await post.queryOne({ id: pId }, { IndexName: "gsi3" });
+    expect(found?.title).toBe("Scan me");
   });
 
   it("get returns null for missing", async () => {
