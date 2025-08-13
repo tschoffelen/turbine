@@ -30,7 +30,7 @@ const users = defineEntity({
     updatedAt: z.iso.datetime().optional(),
   }),
   keys: {
-    pk: (user) => `user#${user.id}`,
+    pk: (user) => ["user", user.id], // turns `user#{id}`
     sk: (user) => user.email,
     createdAt: (user) => user.createdAt || new Date().toISOString(),
     updatedAt: () => new Date().toISOString(),

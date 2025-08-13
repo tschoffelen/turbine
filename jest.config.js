@@ -7,4 +7,5 @@ export default {
   transform: {
     ...tsJestTransformCfg,
   },
+  collectCoverageFrom: ["./src/**/*.ts"],
 };

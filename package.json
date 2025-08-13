@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "test": "yarn test:types && yarn test:unit",
     "test:types": "yarn tsc --noEmit tests/type-checking.ts --esModuleInterop",
-    "test:unit": "jest",
+    "test:unit": "jest --coverage",
     "prepare": "yarn build",
     "release": "semantic-release"
   },
@@ -35,8 +35,10 @@
   "homepage": "https://github.com/tschoffelen/turbine#readme",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.864.0",
-    "@aws-sdk/lib-dynamodb": "^3.864.0",
-    "zod": "^4.0.17"
+    "@aws-sdk/lib-dynamodb": "^3.864.0"
+  },
+  "peerDependencies": {
+    "zod": ">=4.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
@@ -52,6 +54,7 @@
     "semantic-release": "^24.2.7",
     "ts-jest": "^29.4.1",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.39.1"
+    "typescript-eslint": "^8.39.1",
+    "zod": "^4.0.17"
   }
 }
