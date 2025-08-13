@@ -1,8 +1,8 @@
 import { describe, it, expect } from "@jest/globals";
 import z from "zod";
 
-import { defineEntity, defineTable } from "../src";
-import { resolveKey, resolveKeyAndIndex } from "../src/parsing";
+import { defineEntity, defineTable } from "../../src";
+import { resolveKey, resolveKeyAndIndex } from "../../src/parsing";
 
 const table = defineTable({
   name: "test",
