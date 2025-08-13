@@ -7,5 +7,8 @@ export default {
   transform: {
     ...tsJestTransformCfg,
   },
+  // Run DynamoDB table setup once before all tests
+  globalSetup: "<rootDir>/tests/integration/setup.ts",
+  testTimeout: 120000,
   collectCoverageFrom: ["./src/**/*.ts"],
 };
