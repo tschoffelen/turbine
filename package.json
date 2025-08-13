@@ -1,10 +1,14 @@
 {
   "name": "dynamodb-turbine",
   "version": "1.0.0",
+  "type": "module",
   "description": "Entity mapping and query library for DynamoDB",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest"
+    "build": "tsc",
+    "test": "yarn test:types && yarn test:unit",
+    "test:types": "yarn tsc --noEmit tests/type-checking.ts --esModuleInterop",
+    "test:unit": "jest"
   },
   "repository": {
     "type": "git",
@@ -27,5 +31,11 @@
     "@aws-sdk/client-dynamodb": "^3.864.0",
     "@aws-sdk/lib-dynamodb": "^3.864.0",
     "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.0.5",
+    "jest": "^30.0.5",
+    "ts-jest": "^29.4.1",
+    "typescript": "^5.9.2"
   }
 }

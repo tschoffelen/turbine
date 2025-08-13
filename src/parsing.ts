@@ -21,6 +21,8 @@ export const parsePagedResult = async <D extends EntityDefinition<z.ZodObject>>(
 
   if (lastEvaluatedKey) {
     output.lastEvaluatedKey = lastEvaluatedKey;
+  }
+  if (next) {
     output.next = next;
   }
 
@@ -41,7 +43,7 @@ export const resolveKey = async <S extends z.ZodObject>(
     );
   }
 
-  const key = {};
+  const key: Record<string, unknown> = {};
   if (index.hashKey) {
     const hashKeyValue = values[index.hashKey];
     if (hashKeyValue === undefined || hashKeyValue === null) {
