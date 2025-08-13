@@ -19,7 +19,9 @@ export const defineEntity = <S extends z.ZodObject>(
   definition: EntityDefinition<S>,
 ): Entity<EntityDefinition<S>> => {
   // @ts-expect-error missing
-  const entity: Entity<EntityDefinition<S>> = {};
+  const entity: Entity<EntityDefinition<S>> = {
+    definition,
+  };
 
   entity.put = async (data) => {
     const payload = await expandPayload(definition, data);
@@ -50,10 +52,16 @@ export const defineEntity = <S extends z.ZodObject>(
   };
 
   entity.query = async (key, options) => {
-    const { Key, IndexName } = await resolveKeyAndIndex(definition, key);
+    let IndexName, Key;
+    if (options?.IndexName) {
+      IndexName = options.IndexName;
+      Key = await resolveKey(definition, IndexName, key);
+    } else {
+      ({ Key, IndexName } = await resolveKeyAndIndex(definition, key));
+    }
     const { Items, LastEvaluatedKey } = await definition.table.query({
       ...generateKeyConditionExpression(Key),
-      IndexName,
+      IndexName: IndexName === "table" ? undefined : IndexName,
       ...options,
     });
 

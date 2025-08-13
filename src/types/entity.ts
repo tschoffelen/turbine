@@ -19,7 +19,6 @@ export type PagedResult<D extends EntityDefinition<z.ZodObject>> =
 export type QueryOptions = Omit<
   QueryCommandInput,
   | "TableName"
-  | "IndexName"
   | "KeyConditionExpression"
   | "ExpressionAttributeNames"
   | "ExpressionAttributeValues"
@@ -28,6 +27,7 @@ export type QueryOptions = Omit<
 export type ScanOptions = Omit<ScanCommandInput, "TableName">;
 
 export type Entity<D extends EntityDefinition<z.ZodObject>> = {
+  definition: D;
   get(key: Partial<z.infer<D["schema"]>>): Promise<EntityInstance<D> | null>;
   query(
     key: Partial<z.infer<D["schema"]>>,

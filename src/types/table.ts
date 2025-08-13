@@ -16,7 +16,7 @@ import {
 
 export type TableIndexDefinition = {
   hashKey: string;
-  rangeKey: string;
+  rangeKey?: string;
 };
 
 export type TableDefinition = {

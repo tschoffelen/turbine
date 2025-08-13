@@ -1,10 +1,10 @@
 import {
+  DynamoDBClient,
   DeleteItemCommand,
   GetItemCommand,
   PutItemCommand,
   UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb/dist-types/DynamoDBClient";
 import {
   DeleteCommandInput,
   DynamoDBDocumentClient,
@@ -37,7 +37,7 @@ export const defineTable = (definition: TableDefinition): Table => {
     throw new TurbineError("Table name is required");
   }
 
-  if (!definition.indexes?.default) {
+  if (!definition.indexes?.table) {
     throw new TurbineError("Specify at least one index called 'table'");
   }
 

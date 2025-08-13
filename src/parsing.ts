@@ -34,6 +34,7 @@ export const resolveKey = async <S extends z.ZodObject>(
   definition: EntityDefinition<S>,
   indexName: string,
   keyData: Partial<z.infer<S>>,
+  strict: boolean = true,
 ): Promise<Record<string, unknown>> => {
   const values = await expandPartialPayload(definition, keyData);
 
@@ -55,9 +56,12 @@ export const resolveKey = async <S extends z.ZodObject>(
   if (index.rangeKey) {
     const rangeKeyValue = values[index.rangeKey];
     if (rangeKeyValue === undefined || rangeKeyValue === null) {
-      throw new TurbineError(`No value found for "${index.rangeKey}"`);
+      if (strict) {
+        throw new TurbineError(`No value found for "${index.rangeKey}"`);
+      }
+    } else {
+      key[index.rangeKey] = values[index.rangeKey];
     }
-    key[index.rangeKey] = values[index.rangeKey];
   }
 
   return key;
@@ -71,7 +75,17 @@ export const resolveKeyAndIndex = async <S extends z.ZodObject>(
 
   for (const IndexName of Object.keys(indexes)) {
     try {
-      const Key = await resolveKey(definition, IndexName, keyData);
+      const Key = await resolveKey(definition, IndexName, keyData, true);
+      return { IndexName, Key };
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  // Try again with strict=false
+  for (const IndexName of Object.keys(indexes)) {
+    try {
+      const Key = await resolveKey(definition, IndexName, keyData, false);
       return { IndexName, Key };
     } catch (_) {
       // ignore
@@ -111,10 +125,19 @@ export const parseKeys = <S extends z.ZodObject>(
 ): Partial<Record<string, KeyDefinitionPrimitive>> => {
   const keys: Partial<Record<string, KeyDefinitionPrimitive>> = {};
   for (const key in definition.keys) {
-    if (typeof definition.keys[key] === "function") {
-      keys[key] = definition.keys[key](data as z.infer<S>);
-    } else {
-      keys[key] = definition.keys[key];
+    let value = definition.keys[key];
+    let invalid = false;
+    if (typeof value === "function") {
+      value = value(data as z.infer<S>);
+    }
+    if (Array.isArray(value)) {
+      for (const part of value) {
+        if (part === undefined) invalid = true;
+      }
+      value = value.join("#");
+    }
+    if (!invalid) {
+      keys[key] = value;
     }
   }
   return keys;
