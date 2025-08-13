@@ -19,7 +19,7 @@ export const generateKeyConditionExpression = (
     .join(" AND ");
 
   return {
-    Expression: keyCondition,
+    KeyConditionExpression: keyCondition,
     ExpressionAttributeNames: generateAttributeNames(key),
     ExpressionAttributeValues: generateAttributeValues(key),
   };

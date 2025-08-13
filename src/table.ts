@@ -1,11 +1,9 @@
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
-  DynamoDBClient,
-  DeleteItemCommand,
-  GetItemCommand,
-  PutItemCommand,
-  UpdateItemCommand,
-} from "@aws-sdk/client-dynamodb";
-import {
+  DeleteCommand,
+  GetCommand,
+  PutCommand,
+  UpdateCommand,
   DeleteCommandInput,
   DynamoDBDocumentClient,
   GetCommandInput,
@@ -43,25 +41,25 @@ export const defineTable = (definition: TableDefinition): Table => {
 
   const put = (params: Omit<PutCommandInput, "TableName">) => {
     return client.send(
-      new PutItemCommand({ ...params, TableName: definition.name }),
+      new PutCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const update = (params: Omit<UpdateCommandInput, "TableName">) => {
     return client.send(
-      new UpdateItemCommand({ ...params, TableName: definition.name }),
+      new UpdateCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const get = (params: Omit<GetCommandInput, "TableName">) => {
     return client.send(
-      new GetItemCommand({ ...params, TableName: definition.name }),
+      new GetCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const deleteItem = (params: Omit<DeleteCommandInput, "TableName">) => {
     return client.send(
-      new DeleteItemCommand({ ...params, TableName: definition.name }),
+      new DeleteCommand({ ...params, TableName: definition.name }),
     );
   };
 
