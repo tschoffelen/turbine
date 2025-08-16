@@ -4,7 +4,7 @@ import { TurbineError } from "./error";
 import {
   Entity,
   EntityDefinition,
-  EntityInstance,
+  Instance,
   PagedResult,
 } from "./types/entity";
 import { KeyDefinitionPrimitive } from "./types/key";
@@ -151,11 +151,11 @@ export const parseInstance = async <D extends EntityDefinition<z.ZodObject>>(
   definition: D,
   entity: Entity<D>,
   input: unknown,
-): Promise<EntityInstance<D>> => {
+): Promise<Instance<Entity<D>>> => {
   const result = await definition.schema.parseAsync(input);
 
   result.update = async (patch: Partial<z.infer<D["schema"]>>) =>
     entity.update(input as Partial<z.infer<D["schema"]>>, patch);
 
-  return result as EntityInstance<D>;
+  return result as Instance<Entity<D>>;
 };

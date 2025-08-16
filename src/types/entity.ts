@@ -10,11 +10,12 @@ export type EntityDefinition<S extends z.ZodObject> = {
   keys: Record<string, KeyDefinition<z.infer<S>>>;
 };
 
-export type PagedResult<D extends EntityDefinition<z.ZodObject>> =
-  EntityInstance<D>[] & {
-    lastEvaluatedKey?: Record<string, any> | undefined;
-    next?: () => Promise<PagedResult<D>>;
-  };
+export type PagedResult<D extends EntityDefinition<z.ZodObject>> = Instance<
+  Entity<D>
+>[] & {
+  lastEvaluatedKey?: Record<string, any> | undefined;
+  next?: () => Promise<PagedResult<D>>;
+};
 
 export enum Operator {
   Equals = "=",
@@ -56,7 +57,7 @@ export type QueryOptions<D extends EntityDefinition<z.ZodObject>> = Omit<
 
 export type Entity<D extends EntityDefinition<z.ZodObject>> = {
   definition: D;
-  get(key: Partial<z.infer<D["schema"]>>): Promise<EntityInstance<D> | null>;
+  get(key: Partial<z.infer<D["schema"]>>): Promise<Instance<Entity<D>> | null>;
   query(
     key: Partial<z.infer<D["schema"]>>,
     options?: QueryOptions<D>,
@@ -64,23 +65,25 @@ export type Entity<D extends EntityDefinition<z.ZodObject>> = {
   queryOne(
     key: Partial<z.infer<D["schema"]>>,
     options?: QueryOptions<D>,
-  ): Promise<EntityInstance<D> | null>;
+  ): Promise<Instance<Entity<D>> | null>;
   queryAll(
     key: Partial<z.infer<D["schema"]>>,
     options?: QueryOptions<D>,
-  ): Promise<EntityInstance<D>[]>;
+  ): Promise<Instance<Entity<D>>[]>;
   put(
     data: Partial<z.infer<D["schema"]>> &
       Omit<z.infer<D["schema"]>, keyof D["keys"]>,
-  ): Promise<EntityInstance<D>>;
+  ): Promise<Instance<Entity<D>>>;
   update(
     key: Partial<z.infer<D["schema"]>>,
     patch: Partial<z.infer<D["schema"]>>,
-  ): Promise<EntityInstance<D>>;
+  ): Promise<Instance<Entity<D>>>;
 };
 
-export type EntityInstance<D extends EntityDefinition<z.ZodObject>> = z.infer<
-  D["schema"]
+export type Instance<E extends Entity<EntityDefinition<z.ZodObject>>> = z.infer<
+  E["definition"]["schema"]
 > & {
-  update(data: Partial<z.infer<D["schema"]>>): Promise<EntityInstance<D>>;
+  update(
+    data: Partial<z.infer<E["definition"]["schema"]>>,
+  ): Promise<Instance<E>>;
 };
