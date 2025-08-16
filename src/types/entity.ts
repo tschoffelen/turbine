@@ -16,28 +16,58 @@ export type PagedResult<D extends EntityDefinition<z.ZodObject>> =
     next?: () => Promise<PagedResult<D>>;
   };
 
-export type QueryOptions = Omit<
+export enum Operator {
+  Equals = "=",
+  NotEquals = "<>",
+  GreaterThan = ">",
+  LessThan = "<",
+  GreaterThanOrEquals = ">=",
+  LessThanOrEquals = "<=",
+  Contains = "contains",
+  NotContains = "not contains",
+  BeginsWith = "begins_with",
+  Exists = "exists",
+  NotExists = "not exists",
+}
+
+export type ExistenceOperator = Operator.Exists | Operator.NotExists;
+export type ComparisonOperator = Exclude<Operator, ExistenceOperator>;
+
+export type Filter<D extends EntityDefinition<z.ZodObject>> =
+  | {
+      attr: keyof z.infer<D["schema"]> & keyof D["keys"];
+      op: ComparisonOperator;
+      value: unknown;
+    }
+  | {
+      attr: keyof z.infer<D["schema"]> & keyof D["keys"];
+      op: ExistenceOperator;
+    };
+
+export type QueryOptions<D extends EntityDefinition<z.ZodObject>> = Omit<
   QueryCommandInput,
   | "TableName"
   | "KeyConditionExpression"
   | "ExpressionAttributeNames"
   | "ExpressionAttributeValues"
->;
+> & {
+  filters?: Filter<D>[];
+};
 
 export type Entity<D extends EntityDefinition<z.ZodObject>> = {
   definition: D;
   get(key: Partial<z.infer<D["schema"]>>): Promise<EntityInstance<D> | null>;
   query(
     key: Partial<z.infer<D["schema"]>>,
-    options?: QueryOptions,
+    options?: QueryOptions<D>,
   ): Promise<PagedResult<D>>;
   queryOne(
     key: Partial<z.infer<D["schema"]>>,
-    options?: QueryOptions,
+    options?: QueryOptions<D>,
   ): Promise<EntityInstance<D> | null>;
   queryAll(
     key: Partial<z.infer<D["schema"]>>,
-    options?: QueryOptions,
+    options?: QueryOptions<D>,
   ): Promise<EntityInstance<D>[]>;
   put(
     data: Partial<z.infer<D["schema"]>> &

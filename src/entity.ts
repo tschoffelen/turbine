@@ -2,7 +2,7 @@ import { ReturnValue } from "@aws-sdk/client-dynamodb";
 import { z } from "zod";
 
 import {
-  generateKeyConditionExpression,
+  generateQueryExpression,
   generateUpdateExpression,
 } from "./expressions";
 import {
@@ -59,14 +59,18 @@ export const defineEntity = <S extends z.ZodObject>(
     } else {
       ({ Key, IndexName } = await resolveKeyAndIndex(definition, key));
     }
+
+    const { filters, ...dynamoDbOptions } = options || {};
+    const query = generateQueryExpression(Key, filters);
+
     const { Items, LastEvaluatedKey } = await definition.table.query({
-      ...generateKeyConditionExpression(Key),
+      ...query,
       IndexName: IndexName === "table" ? undefined : IndexName,
-      ...options,
+      ...dynamoDbOptions,
     });
 
     const next = () =>
-      entity.query(key, { ExclusiveStartKey: LastEvaluatedKey });
+      entity.query(key, { ...options, ExclusiveStartKey: LastEvaluatedKey });
 
     return parsePagedResult(definition, entity, Items, LastEvaluatedKey, next);
   };
