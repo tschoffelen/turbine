@@ -22,9 +22,9 @@ export const parsePagedResult = async <D extends EntityDefinition<z.ZodObject>>(
 
   if (lastEvaluatedKey) {
     output.lastEvaluatedKey = lastEvaluatedKey;
-  }
-  if (next) {
-    output.next = next;
+    if (next) {
+      output.next = next;
+    }
   }
 
   return output;
