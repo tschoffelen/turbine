@@ -140,7 +140,7 @@ export const parseKeys = <S extends z.ZodObject>(
       }
       value = value.join("#");
     }
-    if (!invalid) {
+    if (!invalid && value !== undefined) {
       keys[key] = value;
     }
   }
