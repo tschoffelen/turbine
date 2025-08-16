@@ -1,7 +1,6 @@
 {
   "name": "dynamodb-turbine",
   "version": "0.0.1",
-  "type": "module",
   "description": "Entity mapping and query library for DynamoDB",
   "main": "dist/index.js",
   "files": [
