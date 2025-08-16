@@ -49,24 +49,14 @@ export const post = defineEntity({
     id: z.string(),
     authorId: z.string(),
     title: z.string(),
-    createdAt: z
-      .string()
-      .datetime()
-      .default(() => new Date().toISOString()),
-    // keys
-    pk: z.string().optional(),
-    sk: z.string().optional(),
-    type: z.string().optional(),
-    gsi1pk: z.string().optional(),
-    gsi1sk: z.string().optional(),
-    gsi2pk: z.string().optional(),
-    gsi2sk: z.string().optional(),
+    deletedAt: z.iso.datetime().optional(),
+    createdAt: z.iso.datetime().default(() => new Date().toISOString()),
   }),
   keys: {
     type: () => "post",
     // by user timeline
     pk: (p) => ["user", p.authorId],
-    sk: (p) => ["post", p.createdAt, p.id],
+    sk: (p) => p.id,
     // global feed by createdAt
     gsi1pk: () => "post",
     gsi1sk: (p) => [p.createdAt, p.id],
