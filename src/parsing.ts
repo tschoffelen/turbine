@@ -97,10 +97,14 @@ export const resolveKeyAndIndex = async <S extends z.ZodObject>(
   );
 };
 
-export const expandPayload = async <S extends z.ZodObject>(
-  definition: EntityDefinition<S>,
-  data: z.infer<S>,
-): Promise<Partial<z.infer<S>>> => {
+export const expandPayload = async <
+  S extends z.ZodObject,
+  D extends EntityDefinition<S>,
+>(
+  definition: D,
+  data: Partial<z.infer<D["schema"]>> &
+    Omit<z.infer<D["schema"]>, keyof D["keys"]>,
+): Promise<Partial<z.infer<D["schema"]>>> => {
   const parsedData = await definition.schema.parseAsync(data);
   return {
     ...parsedData,
