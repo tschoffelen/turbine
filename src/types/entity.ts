@@ -39,10 +39,12 @@ export type Entity<D extends EntityDefinition<z.ZodObject>> = {
     key: Partial<z.infer<D["schema"]>>,
     options?: QueryOptions,
   ): Promise<EntityInstance<D>[]>;
-  put(data: z.infer<D["schema"]>): Promise<EntityInstance<D>>;
+  put(
+    data: Omit<z.infer<D["schema"]>, keyof D["keys"]>,
+  ): Promise<EntityInstance<D>>;
   update(
     key: Partial<z.infer<D["schema"]>>,
-    patch: Partial<z.infer<D["schema"]>>,
+    patch: Partial<Omit<z.infer<D["schema"]>, keyof D["keys"]>>,
   ): Promise<EntityInstance<D>>;
 };
 
