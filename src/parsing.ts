@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { TurbineError } from "./error";
+import { buildValue } from "./expressions";
 import {
   Entity,
   EntityDefinition,
@@ -9,11 +10,8 @@ import {
   KeyConditionPrimitiveValue,
   PagedResult,
   QueryKey,
-  TableKey,
 } from "./types/entity";
 import { KeyDefinitionPrimitive } from "./types/key";
-import { TableIndexDefinition } from "./types/table";
-import { buildValue } from "./expressions";
 
 export const parsePagedResult = async <D extends EntityDefinition<z.ZodObject>>(
   definition: D,
@@ -34,43 +32,6 @@ export const parsePagedResult = async <D extends EntityDefinition<z.ZodObject>>(
   }
 
   return output;
-};
-
-export const resolveKey = async <S extends z.ZodObject>(
-  definition: EntityDefinition<S>,
-  indexName: string,
-  keyData: Partial<z.infer<S>>,
-  strict: boolean = true,
-): Promise<Record<string, unknown>> => {
-  const values = await expandPartialPayload(definition, keyData);
-
-  const index = definition.table.definition.indexes[indexName];
-  if (!index) {
-    throw new TurbineError(
-      `Index with name "${indexName}" is not defined in table "${definition.table.definition.name}"`,
-    );
-  }
-
-  const key: Record<string, unknown> = {};
-  if (index.hashKey) {
-    const hashKeyValue = values[index.hashKey];
-    if (hashKeyValue === undefined || hashKeyValue === null) {
-      throw new TurbineError(`No value found for "${index.hashKey}"`);
-    }
-    key[index.hashKey] = values[index.hashKey];
-  }
-  if (index.rangeKey) {
-    const rangeKeyValue = values[index.rangeKey];
-    if (rangeKeyValue === undefined || rangeKeyValue === null) {
-      if (strict) {
-        throw new TurbineError(`No value found for "${index.rangeKey}"`);
-      }
-    } else {
-      key[index.rangeKey] = values[index.rangeKey];
-    }
-  }
-
-  return key;
 };
 
 export const resolveKeyValues = (key: Record<string, any>) =>
@@ -124,36 +85,6 @@ export const resolveIndex = <D extends EntityDefinition<z.ZodObject>>(
   }
 
   return [indexName, resolvedKey];
-};
-
-export const resolveKeyAndIndex = async <S extends z.ZodObject>(
-  definition: EntityDefinition<S>,
-  keyData: Partial<z.infer<S>>,
-): Promise<{ IndexName: string; Key: Record<string, unknown> }> => {
-  const { indexes } = definition.table.definition;
-
-  for (const IndexName of Object.keys(indexes)) {
-    try {
-      const Key = await resolveKey(definition, IndexName, keyData, true);
-      return { IndexName, Key };
-    } catch (_) {
-      // ignore
-    }
-  }
-
-  // Try again with strict=false
-  for (const IndexName of Object.keys(indexes)) {
-    try {
-      const Key = await resolveKey(definition, IndexName, keyData, false);
-      return { IndexName, Key };
-    } catch (_) {
-      // ignore
-    }
-  }
-
-  throw new TurbineError(
-    `No matching index found for key data: ${JSON.stringify(keyData)}`,
-  );
 };
 
 export const expandPayload = async <

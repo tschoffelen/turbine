@@ -2,7 +2,6 @@ import { ReturnValue } from "@aws-sdk/client-dynamodb";
 import { z } from "zod";
 
 import {
-  buildValue,
   generateQueryExpression,
   generateUpdateExpression,
 } from "./expressions";
@@ -10,19 +9,11 @@ import {
   expandPayload,
   expandPartialPayload,
   parseInstance,
-  resolveKey,
   parsePagedResult,
-  resolveKeyAndIndex,
   resolveIndex,
   resolveKeyValues,
 } from "./parsing";
-import {
-  Entity,
-  EntityDefinition,
-  KeyConditionPrimitiveValue,
-  RangeKeyConditionExpression,
-} from "./types/entity";
-import { TurbineError } from "./error";
+import { Entity, EntityDefinition } from "./types/entity";
 
 export const defineEntity = <S extends z.ZodObject>(
   definition: EntityDefinition<S>,
