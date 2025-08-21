@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeAll } from "@jest/globals";
 import { v4 as uuid } from "uuid";
+import { describe, it, expect } from "vitest";
 
 import { like, post, table, user } from "./schema";
 import { resolveKey } from "../../src/parsing";
@@ -9,13 +9,6 @@ const runId = uuid();
 describe("integration: CRUD", () => {
   let uId: string = uuid();
   let pId: string = uuid();
-
-  beforeAll(() => {
-    // sanity (no assertions here to satisfy jest lint rule)
-    if (!process.env.TURBINE_TEST_TABLE) {
-      throw new Error("TURBINE_TEST_TABLE must be set by setup script");
-    }
-  });
 
   it("creates and gets a user", async () => {
     uId = `${runId}-u1`;

@@ -1,7 +1,6 @@
 import eslint from "@eslint/js";
 import { globalIgnores } from "eslint/config";
 import * as importPlugin from "eslint-plugin-import";
-import pluginJest from "eslint-plugin-jest";
 import noOnlyTests from "eslint-plugin-no-only-tests";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import tseslint from "typescript-eslint";
@@ -10,7 +9,6 @@ export default tseslint.config(
   eslint.configs.recommended,
   tseslint.configs.recommended,
   eslintPluginPrettierRecommended,
-  pluginJest.configs["flat/recommended"],
   [
     globalIgnores([
       "**/node_modules/",

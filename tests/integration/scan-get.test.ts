@@ -1,5 +1,5 @@
-import { describe, it, expect } from "@jest/globals";
 import { v4 as uuid } from "uuid";
+import { describe, it, expect } from "vitest";
 
 import { post, user } from "./schema";
 
