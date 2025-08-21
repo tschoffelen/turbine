@@ -4,6 +4,7 @@ import { TurbineError } from "./error";
 import {
   Entity,
   EntityDefinition,
+  IndexName,
   Instance,
   PagedResult,
   QueryKey,
@@ -73,15 +74,33 @@ export const resolveKey = async <S extends z.ZodObject>(
 export const resolveIndex = <D extends EntityDefinition<z.ZodObject>>(
   definition: D,
   key: QueryKey<D>,
-): TableIndexDefinition => {
-  const indexName = key.index || "table";
+): [IndexName, any] => {
+  const indexName = (key.index || "table") as IndexName;
   const index = definition.table.definition.indexes[indexName];
+
   if (!index) {
     throw new TurbineError(
       `Index with name "${indexName}" is not defined in table "${definition.table.definition.name}"`,
     );
   }
-  return [indexName, index];
+
+  if (
+    !(index.hashKey in key) ||
+    key[index.hashKey] === null ||
+    key[index.hashKey] === undefined
+  ) {
+    throw new TurbineError(`No value found for hash key "${index.hashKey}"`);
+  }
+
+  const resolvedKey = {
+    [index.hashKey]: key[index.hashKey],
+  };
+
+  if (index.rangeKey && key[index.rangeKey] !== undefined) {
+    resolvedKey[index.rangeKey] = key[index.rangeKey];
+  }
+
+  return [indexName, resolvedKey];
 };
 
 export const resolveKeyAndIndex = async <S extends z.ZodObject>(

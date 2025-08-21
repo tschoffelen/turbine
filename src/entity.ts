@@ -53,7 +53,7 @@ export const defineEntity = <S extends z.ZodObject>(
   };
 
   entity.query = async (key, options) => {
-    const [IndexName, index] = await resolveIndex(definition, key);
+    const [IndexName, Key] = await resolveIndex(definition, key);
 
 
     const { filters, ...dynamoDbOptions } = options || {};

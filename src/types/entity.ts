@@ -67,6 +67,8 @@ export type QueryOptions<D extends EntityDefinition<z.ZodObject>> = Omit<
   filters?: Filters<D>;
 };
 
+export type IndexName = string | "table";
+
 export type QueryKey<D extends EntityDefinition<z.ZodObject>> = {
   index?: keyof D["table"]["definition"]["indexes"];
 } & {
