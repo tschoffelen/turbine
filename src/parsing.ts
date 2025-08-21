@@ -6,12 +6,14 @@ import {
   EntityDefinition,
   IndexName,
   Instance,
+  KeyConditionPrimitiveValue,
   PagedResult,
   QueryKey,
   TableKey,
 } from "./types/entity";
 import { KeyDefinitionPrimitive } from "./types/key";
 import { TableIndexDefinition } from "./types/table";
+import { buildValue } from "./expressions";
 
 export const parsePagedResult = async <D extends EntityDefinition<z.ZodObject>>(
   definition: D,
@@ -70,6 +72,27 @@ export const resolveKey = async <S extends z.ZodObject>(
 
   return key;
 };
+
+export const resolveKeyValues = (key: Record<string, any>) =>
+  Object.entries(key).reduce(
+    (
+      acc: Record<string, KeyConditionPrimitiveValue>,
+      [k, v]: [string, any],
+    ) => {
+      if (typeof v === "object" && !Array.isArray(v)) {
+        if ("equals" in v) {
+          v = v.equals;
+        } else {
+          throw new TurbineError(
+            "When using `get`, the only valid key expression is `equals`.",
+          );
+        }
+      }
+      acc[k] = buildValue(v);
+      return acc;
+    },
+    {},
+  );
 
 export const resolveIndex = <D extends EntityDefinition<z.ZodObject>>(
   definition: D,

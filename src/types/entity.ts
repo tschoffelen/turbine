@@ -108,6 +108,9 @@ export type Entity<D extends EntityDefinition<z.ZodObject>> = {
     key: TableKey<D["table"]["definition"]["indexes"]["table"]>,
     patch: Partial<z.infer<D["schema"]>>,
   ): Promise<Instance<Entity<D>>>;
+  delete(
+    key: TableKey<D["table"]["definition"]["indexes"]["table"]>,
+  ): Promise<void>;
 };
 
 export type Instance<E extends Entity<EntityDefinition<z.ZodObject>>> = z.infer<

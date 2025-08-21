@@ -24,8 +24,10 @@ describe("integration: queries and pagination", () => {
       await new Promise((r) => setTimeout(r, 10));
     }
 
-    // Do not specify IndexName so the library can auto-detect gsi1 from `type`
-    const page1 = await post.query({ type: "post" }, { Limit: 2 });
+    const page1 = await post.query(
+      { index: "gsi1", type: "post" },
+      { Limit: 2 },
+    );
     expect(page1.length).toBeLessThanOrEqual(2);
     expect(typeof page1.next === "function" || page1.next === undefined).toBe(
       true,
@@ -55,7 +57,10 @@ describe("integration: queries and pagination", () => {
       createdAt: new Date().toISOString(),
     });
 
-    const found = await comment.queryOne({ postId: p.id });
+    const found = await comment.queryOne({
+      pk: ["post", p.id],
+      sk: { beginsWith: "comment" },
+    });
     expect(found?.id).toBe(c.id);
   });
 });

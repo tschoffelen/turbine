@@ -24,14 +24,6 @@ export const user = defineEntity({
       .string()
       .datetime()
       .default(() => new Date().toISOString()),
-    // keys
-    pk: z.string().optional(),
-    sk: z.string().optional(),
-    type: z.string().optional(),
-    gsi1pk: z.string().optional(),
-    gsi1sk: z.string().optional(),
-    gsi2pk: z.string().optional(),
-    gsi2sk: z.string().optional(),
   }),
   keys: {
     type: () => "user",
@@ -77,12 +69,6 @@ export const comment = defineEntity({
       .string()
       .datetime()
       .default(() => new Date().toISOString()),
-    // keys
-    pk: z.string().optional(),
-    sk: z.string().optional(),
-    type: z.string().optional(),
-    gsi1pk: z.string().optional(),
-    gsi1sk: z.string().optional(),
   }),
   keys: {
     type: () => "comment",
@@ -103,12 +89,6 @@ export const like = defineEntity({
       .string()
       .datetime()
       .default(() => new Date().toISOString()),
-    // keys
-    pk: z.string().optional(),
-    sk: z.string().optional(),
-    type: z.string().optional(),
-    gsi1pk: z.string().optional(),
-    gsi1sk: z.string().optional(),
   }),
   keys: {
     type: () => "like",

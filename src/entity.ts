@@ -2,6 +2,7 @@ import { ReturnValue } from "@aws-sdk/client-dynamodb";
 import { z } from "zod";
 
 import {
+  buildValue,
   generateQueryExpression,
   generateUpdateExpression,
 } from "./expressions";
@@ -13,8 +14,15 @@ import {
   parsePagedResult,
   resolveKeyAndIndex,
   resolveIndex,
+  resolveKeyValues,
 } from "./parsing";
-import { Entity, EntityDefinition } from "./types/entity";
+import {
+  Entity,
+  EntityDefinition,
+  KeyConditionPrimitiveValue,
+  RangeKeyConditionExpression,
+} from "./types/entity";
+import { TurbineError } from "./error";
 
 export const defineEntity = <S extends z.ZodObject>(
   definition: EntityDefinition<S>,
@@ -34,17 +42,18 @@ export const defineEntity = <S extends z.ZodObject>(
   };
 
   entity.update = async (key, patch) => {
-    const payload = await expandPartialPayload(definition, patch);
-    const Key = await resolveKey(definition, "table", key);
+    key.index = "table";
+    const [, Key] = await resolveIndex(definition, key);
 
-    for (const field of Object.keys(definition.keys)) {
+    const payload = await expandPartialPayload(definition, patch);
+    for (const field of Object.keys(Key)) {
       if (field in payload) {
         delete payload[field];
       }
     }
 
     const { Attributes } = await definition.table.update({
-      Key,
+      Key: resolveKeyValues(Key),
       ...generateUpdateExpression(payload, ["createdAt"]),
       ReturnValues: ReturnValue.ALL_NEW,
     });
@@ -54,7 +63,6 @@ export const defineEntity = <S extends z.ZodObject>(
 
   entity.query = async (key, options) => {
     const [IndexName, Key] = await resolveIndex(definition, key);
-
 
     const { filters, ...dynamoDbOptions } = options || {};
     const query = generateQueryExpression(Key, filters);
@@ -92,14 +100,23 @@ export const defineEntity = <S extends z.ZodObject>(
   };
 
   entity.get = async (key) => {
-    const Key = await resolveKey(definition, "table", key);
+    key.index = "table";
+    const [, Key] = await resolveIndex(definition, key);
     const { Item } = await definition.table.get({
-      Key,
+      Key: resolveKeyValues(Key),
     });
 
     if (!Item) return null;
 
     return parseInstance(definition, entity, Item);
+  };
+
+  entity.delete = async (key) => {
+    key.index = "table";
+    const [, Key] = await resolveIndex(definition, key);
+    await definition.table.delete({
+      Key: resolveKeyValues(Key),
+    });
   };
 
   return entity;

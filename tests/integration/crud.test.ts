@@ -1,8 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { describe, it, expect } from "vitest";
 
-import { like, post, table, user } from "./schema";
-import { resolveKey } from "../../src/parsing";
+import { like, post, user } from "./schema";
 
 const runId = uuid();
 
@@ -21,13 +20,16 @@ describe("integration: CRUD", () => {
 
     expect(created.id).toBe(uId);
 
-    const fetched = await user.get({ id: uId, email: `${uId}@example.com` });
+    const fetched = await user.get({
+      pk: ["user", uId],
+      sk: ["user", `${uId}@example.com`],
+    });
     expect(fetched?.username).toBe(`user_${uId}`);
   });
 
   it("updates an entity (user)", async () => {
     const updated = await user.update(
-      { id: uId, email: `${uId}@example.com` },
+      { pk: ["user", uId], sk: ["user", `${uId}@example.com`] },
       { username: `updated_${uId}` },
     );
     expect(updated.username).toBe(`updated_${uId}`);
@@ -44,7 +46,11 @@ describe("integration: CRUD", () => {
     expect(created.id).toBe(pId);
 
     // Query post by id using the id-based index
-    const found = await post.queryOne({ id: pId }, { IndexName: "gsi3" });
+    const found = await post.queryOne({
+      index: "gsi3",
+      gsi2pk: "post#id",
+      gsi2sk: pId,
+    });
     expect(found?.id).toBe(pId);
   });
 
@@ -56,20 +62,23 @@ describe("integration: CRUD", () => {
     });
     expect(l1.postId).toBe(pId);
 
-    // Without specifying IndexName, auto-detect will choose gsi1 (type/sk),
-    // which returns all likes; ensure ours is present.
-    const likes = await like.query({});
+    const likes = await like.queryAll({
+      index: "gsi1",
+      type: "like",
+    });
     expect(likes.some((x) => x.userId === uId && x.postId === pId)).toBe(true);
   });
 
   it("deletes a user item", async () => {
-    const Key = await resolveKey(user.definition, "table", {
-      id: uId,
-      email: `${uId}@example.com`,
+    await user.delete({
+      pk: ["user", uId],
+      sk: ["user", `${uId}@example.com`],
     });
-    await table.delete({ Key });
 
-    const fetched = await user.get({ id: uId, email: `${uId}@example.com` });
+    const fetched = await user.get({
+      pk: ["user", uId],
+      sk: ["user", `${uId}@example.com`],
+    });
     expect(fetched).toBeNull();
   });
 });
