@@ -140,8 +140,12 @@ Keys must be specified precisely using the actual key names defined in your enti
 // Get with precise keys
 await users.get({ pk: ["user", "123"], sk: "user@example.com" });
 
-// Query with partial key expressions
-await posts.query({ pk: ["user", "123"], sk: { beginsWith: "comment#" } });
+// Query with complex key expressions and custom indexes
+await posts.query({
+  index: "type-sk",
+  type: "comment",
+  sk: { beginsWith: "user#123#" },
+});
 ```
 
 Query options match DynamoDB’s `QueryCommandInput` (minus the expression fields that Turbine builds for you), so you can set things like `Limit`, `ExclusiveStartKey`, `ScanIndexForward`, `ConsistentRead`, etc.
