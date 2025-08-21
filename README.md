@@ -63,13 +63,19 @@ const user = await users.put({
 // Instance-level update for convenience
 await user.update({ name: "Randy Newman" });
 
-// Or entity-level update
-await users.update({ id: user.id }, { email: "randy@example.com" });
+// Or entity-level update (keys must be specified precisely)
+await users.update(
+  { pk: ["user", user.id], sk: user.email },
+  { email: "randy@example.com" },
+);
 
-// Lookups
-const byPrimaryKey = await users.get({ id: user.id });
-const one = await users.queryOne({ email: "randy@example.com" });
-const all = await users.queryAll({ email: "randy@example.com" });
+// Lookups - keys must be specified precisely
+const byPrimaryKey = await users.get({ pk: ["user", user.id], sk: user.email });
+const one = await users.queryOne({
+  pk: ["user", user.id],
+  sk: { beginsWith: "user@" },
+});
+const all = await users.queryAll({ pk: ["user", user.id] });
 ```
 
 ## Defining tables
@@ -97,7 +103,7 @@ const table = defineTable({
 
 - `schema` is a Zod object. It drives validation and types.
 - `keys` derives fields that are written to the item (e.g. `pk`, `sk`, `type`, timestamps).
-    - A key value can be a string, a function, or an array of parts; arrays join with `#`.
+  - A key value can be a string, a function, or an array of parts; arrays join with `#`.
 
 Example:
 
@@ -119,21 +125,26 @@ const user = defineEntity({
 ## Operations
 
 - put(data): validates with Zod, expands keys, writes, and returns the parsed instance.
-- get(key): resolves the table key from partial data, reads, returns instance or null.
-- update(key, patch): validates/expands, updates, and returns the new instance.
-- query(key, options?): chooses an index based on the key shape; pass `IndexName` in options to override. Returns a paged array with `lastEvaluatedKey` and `next()`.
+- get(key): requires key specification using actual key names (e.g., `pk`, `sk`), reads, returns instance or null.
+- update(key, patch): requires key specification, validates/expands, updates, and returns the new instance.
+- query(key, options?): requires key specification; supports partial expressions like `{beginsWith: "prefix"}`. Returns a paged array with `lastEvaluatedKey` and `next()`.
 - queryOne(key, options?): first match or null.
 - queryAll(key, options?): collects all pages for convenience.
+- delete(key): requires key specification, deletes the item.
 
-Query options match DynamoDB’s `QueryCommandInput` (minus the expression fields that Turbine builds for you), so you can set things like `Limit`, `ExclusiveStartKey`, `ScanIndexForward`, `ConsistentRead`, etc.
+### Key Specification
 
-## Index selection
-
-When you call `query(key)`, Turbine tries to resolve the best index using your `keys` definitions. Provide a more complete key (e.g. both `hashKey` and `rangeKey`) for more precise queries. To force a specific index:
+Keys must be specified precisely using the actual key names defined in your entity. Key arrays are automatically converted to strings joined with `#`.
 
 ```ts
-await users.query({ email: "randy@example.com" }, { IndexName: "type_sk" });
+// Get with precise keys
+await users.get({ pk: ["user", "123"], sk: "user@example.com" });
+
+// Query with partial key expressions
+await posts.query({ pk: ["user", "123"], sk: { beginsWith: "comment#" } });
 ```
+
+Query options match DynamoDB’s `QueryCommandInput` (minus the expression fields that Turbine builds for you), so you can set things like `Limit`, `ExclusiveStartKey`, `ScanIndexForward`, `ConsistentRead`, etc.
 
 ## Types and validation
 
