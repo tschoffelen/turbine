@@ -12,6 +12,7 @@ import {
   resolveKey,
   parsePagedResult,
   resolveKeyAndIndex,
+  resolveIndex,
 } from "./parsing";
 import { Entity, EntityDefinition } from "./types/entity";
 
@@ -52,13 +53,8 @@ export const defineEntity = <S extends z.ZodObject>(
   };
 
   entity.query = async (key, options) => {
-    let IndexName, Key;
-    if (options?.IndexName) {
-      IndexName = options.IndexName;
-      Key = await resolveKey(definition, IndexName, key);
-    } else {
-      ({ Key, IndexName } = await resolveKeyAndIndex(definition, key));
-    }
+    const [IndexName, index] = await resolveIndex(definition, key);
+
 
     const { filters, ...dynamoDbOptions } = options || {};
     const query = generateQueryExpression(Key, filters);

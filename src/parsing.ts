@@ -6,8 +6,11 @@ import {
   EntityDefinition,
   Instance,
   PagedResult,
+  QueryKey,
+  TableKey,
 } from "./types/entity";
 import { KeyDefinitionPrimitive } from "./types/key";
+import { TableIndexDefinition } from "./types/table";
 
 export const parsePagedResult = async <D extends EntityDefinition<z.ZodObject>>(
   definition: D,
@@ -65,6 +68,20 @@ export const resolveKey = async <S extends z.ZodObject>(
   }
 
   return key;
+};
+
+export const resolveIndex = <D extends EntityDefinition<z.ZodObject>>(
+  definition: D,
+  key: QueryKey<D>,
+): TableIndexDefinition => {
+  const indexName = key.index || "table";
+  const index = definition.table.definition.indexes[indexName];
+  if (!index) {
+    throw new TurbineError(
+      `Index with name "${indexName}" is not defined in table "${definition.table.definition.name}"`,
+    );
+  }
+  return [indexName, index];
 };
 
 export const resolveKeyAndIndex = async <S extends z.ZodObject>(

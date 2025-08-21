@@ -2,7 +2,6 @@ import { v4 as uuid } from "uuid";
 import { describe, it, expect } from "vitest";
 
 import { post } from "./schema";
-import { Operator } from "../../src";
 
 describe("integration: filters", () => {
   it("filters out deleted posts", async () => {
@@ -21,14 +20,11 @@ describe("integration: filters", () => {
     });
 
     const results = await post.queryAll(
-      { authorId: runId },
+      { pk: ["user", runId] },
       {
-        filters: [
-          {
-            attr: "deletedAt",
-            op: Operator.NotExists,
-          },
-        ],
+        filters: {
+          deletedAt: { notExists: true },
+        },
       },
     );
 
@@ -51,15 +47,13 @@ describe("integration: filters", () => {
     });
 
     const results = await post.queryAll(
-      { authorId: runId },
+      { pk: ["user", runId] },
       {
-        filters: [
-          {
-            attr: "title",
-            op: Operator.BeginsWith,
-            value: "Hello",
+        filters: {
+          title: {
+            beginsWith: "Hello",
           },
-        ],
+        },
       },
     );
 

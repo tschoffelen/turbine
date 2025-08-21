@@ -68,44 +68,68 @@ export const generateFilterExpression = <
   const ExpressionAttributeNames: Record<string, string> = {};
   const ExpressionAttributeValues: Record<string, unknown> = {};
 
-  const filterExpressions = filters.map((filter) => {
-    const { attr, op } = filter;
-    const attributeName = `#filter_${attr.toString()}`;
-    const attributeValue = `:filter_${attr.toString()}`;
+  const filterExpressions = Object.entries(filters).map(
+    ([attr, expression]) => {
+      const attributeName = `#filter_${attr.toString()}`;
+      const attributeValue = `:filter_${attr.toString()}`;
 
-    ExpressionAttributeNames[attributeName] = attr.toString();
-    if (op !== Operator.Exists && op !== Operator.NotExists) {
-      const value = (filter as any).value;
-      ExpressionAttributeValues[attributeValue] = value;
-    }
+      ExpressionAttributeNames[attributeName] = attr.toString();
 
-    switch (op) {
-      case Operator.Equals:
+      if (expression.equals) {
+        ExpressionAttributeValues[attributeValue] = expression.equals;
         return `${attributeName} = ${attributeValue}`;
-      case Operator.NotEquals:
+      }
+      if (expression.notEquals) {
+        ExpressionAttributeValues[attributeValue] = expression.notEquals;
         return `${attributeName} <> ${attributeValue}`;
-      case Operator.GreaterThan:
+      }
+      if (expression.greaterThan) {
+        ExpressionAttributeValues[attributeValue] = expression.greaterThan;
         return `${attributeName} > ${attributeValue}`;
-      case Operator.LessThan:
+      }
+      if (expression.lessThan) {
+        ExpressionAttributeValues[attributeValue] = expression.lessThan;
         return `${attributeName} < ${attributeValue}`;
-      case Operator.GreaterThanOrEquals:
+      }
+      if (expression.greaterThanOrEquals) {
+        ExpressionAttributeValues[attributeValue] =
+          expression.greaterThanOrEquals;
         return `${attributeName} >= ${attributeValue}`;
-      case Operator.LessThanOrEquals:
+      }
+      if (expression.lessThanOrEquals) {
+        ExpressionAttributeValues[attributeValue] = expression.lessThanOrEquals;
         return `${attributeName} <= ${attributeValue}`;
-      case Operator.Contains:
+      }
+      if (expression.between) {
+        const [start, end] = expression.between;
+        ExpressionAttributeValues[attributeValue + "1"] = start;
+        ExpressionAttributeValues[attributeValue + "2"] = end;
+        return `${attributeName} BETWEEN ${attributeValue + "1"} AND ${attributeValue + "2"}`;
+      }
+      if (expression.contains) {
+        ExpressionAttributeValues[attributeValue] = expression.contains;
         return `contains(${attributeName}, ${attributeValue})`;
-      case Operator.NotContains:
+      }
+      if (expression.notContains) {
+        ExpressionAttributeValues[attributeValue] = expression.notContains;
         return `not contains(${attributeName}, ${attributeValue})`;
-      case Operator.BeginsWith:
+      }
+      if (expression.beginsWith) {
+        ExpressionAttributeValues[attributeValue] = expression.beginsWith;
         return `begins_with(${attributeName}, ${attributeValue})`;
-      case Operator.Exists:
+      }
+      if (expression.exists) {
         return `attribute_exists(${attributeName})`;
-      case Operator.NotExists:
+      }
+      if (expression.notExists) {
         return `attribute_not_exists(${attributeName})`;
-      default:
-        throw new Error(`Unsupported operator: ${op}`);
-    }
-  });
+      }
+
+      // Default: equals
+      ExpressionAttributeValues[attributeValue] = expression.equals;
+      return `${attributeName} = ${attributeValue}`;
+    },
+  );
 
   return {
     FilterExpression: filterExpressions.join(" AND "),

@@ -2,7 +2,7 @@ import { QueryCommandInput } from "@aws-sdk/lib-dynamodb";
 import { z } from "zod";
 
 import { KeyDefinition } from "./key";
-import { Table } from "./table";
+import { Table, TableIndexDefinition } from "./table";
 
 export type EntityDefinition<S extends z.ZodObject> = {
   table: Table;
@@ -10,64 +10,92 @@ export type EntityDefinition<S extends z.ZodObject> = {
   keys: Record<string, KeyDefinition<z.infer<S>>>;
 };
 
-export type PagedResult<D extends EntityDefinition<z.ZodObject>> = Instance<
-  Entity<D>
->[] & {
-  lastEvaluatedKey?: Record<string, any> | undefined;
-  next?: () => Promise<PagedResult<D>>;
+export type PagedResult<D extends EntityDefinition<z.ZodObject<any>>> =
+  Instance<Entity<D>>[] & {
+    lastEvaluatedKey?: Record<string, any> | undefined;
+    next?: () => Promise<PagedResult<D>>;
+  };
+
+export type KeyConditionPrimitiveValue =
+  | number
+  | string
+  | undefined
+  | number[]
+  | string[];
+
+export type HashKeyConditionExpression =
+  | { equals: KeyConditionPrimitiveValue }
+  | KeyConditionPrimitiveValue;
+
+export type RangeKeyConditionExpression =
+  | { equals: KeyConditionPrimitiveValue }
+  | { beginsWith: KeyConditionPrimitiveValue }
+  | { greaterThan: KeyConditionPrimitiveValue }
+  | { lessThan: KeyConditionPrimitiveValue }
+  | { greaterThanOrEquals: KeyConditionPrimitiveValue }
+  | { lessThanOrEquals: KeyConditionPrimitiveValue }
+  | { between: [KeyConditionPrimitiveValue, KeyConditionPrimitiveValue] }
+  | KeyConditionPrimitiveValue;
+
+export type FilterExpression =
+  | { equals: any }
+  | { notEquals: any }
+  | { greaterThan: any }
+  | { lessThan: any }
+  | { greaterThanOrEquals: any }
+  | { lessThanOrEquals: any }
+  | { between: [any, any] }
+  | { contains: any }
+  | { notContains: any }
+  | { beginsWith: any }
+  | { exists: true }
+  | { notExists: true }
+  | KeyConditionPrimitiveValue;
+
+export type Filters<D extends EntityDefinition<z.ZodObject>> = {
+  [K in keyof z.infer<D["schema"]> & keyof D["keys"]]?: FilterExpression;
 };
-
-export enum Operator {
-  Equals = "=",
-  NotEquals = "<>",
-  GreaterThan = ">",
-  LessThan = "<",
-  GreaterThanOrEquals = ">=",
-  LessThanOrEquals = "<=",
-  Contains = "contains",
-  NotContains = "not contains",
-  BeginsWith = "begins_with",
-  Exists = "exists",
-  NotExists = "not exists",
-}
-
-export type ExistenceOperator = Operator.Exists | Operator.NotExists;
-export type ComparisonOperator = Exclude<Operator, ExistenceOperator>;
-
-export type Filter<D extends EntityDefinition<z.ZodObject>> =
-  | {
-      attr: keyof z.infer<D["schema"]> & keyof D["keys"];
-      op: ComparisonOperator;
-      value: unknown;
-    }
-  | {
-      attr: keyof z.infer<D["schema"]> & keyof D["keys"];
-      op: ExistenceOperator;
-    };
 
 export type QueryOptions<D extends EntityDefinition<z.ZodObject>> = Omit<
   QueryCommandInput,
   | "TableName"
+  | "IndexName"
   | "KeyConditionExpression"
   | "ExpressionAttributeNames"
   | "ExpressionAttributeValues"
 > & {
-  filters?: Filter<D>[];
+  filters?: Filters<D>;
 };
+
+export type QueryKey<D extends EntityDefinition<z.ZodObject>> = {
+  index?: keyof D["table"]["definition"]["indexes"];
+} & {
+  [key: string]: HashKeyConditionExpression | RangeKeyConditionExpression;
+};
+
+export type TableKey<T extends TableIndexDefinition> =
+  T["rangeKey"] extends string
+    ? {
+        [HH in T["hashKey"]]: HashKeyConditionExpression;
+      } & {
+        [RR in T["rangeKey"]]: RangeKeyConditionExpression;
+      }
+    : {
+        [HH in T["hashKey"]]: HashKeyConditionExpression;
+      };
 
 export type Entity<D extends EntityDefinition<z.ZodObject>> = {
   definition: D;
-  get(key: Partial<z.infer<D["schema"]>>): Promise<Instance<Entity<D>> | null>;
-  query(
-    key: Partial<z.infer<D["schema"]>>,
-    options?: QueryOptions<D>,
-  ): Promise<PagedResult<D>>;
+  get(
+    key: TableKey<D["table"]["definition"]["indexes"]["table"]>,
+  ): Promise<Instance<Entity<D>> | null>;
+  query(key: QueryKey<D>, options?: QueryOptions<D>): Promise<PagedResult<D>>;
   queryOne(
-    key: Partial<z.infer<D["schema"]>>,
+    key: QueryKey<D>,
     options?: QueryOptions<D>,
   ): Promise<Instance<Entity<D>> | null>;
   queryAll(
-    key: Partial<z.infer<D["schema"]>>,
+    key: QueryKey<D>,
     options?: QueryOptions<D>,
   ): Promise<Instance<Entity<D>>[]>;
   put(
@@ -75,7 +103,7 @@ export type Entity<D extends EntityDefinition<z.ZodObject>> = {
       Omit<z.infer<D["schema"]>, keyof D["keys"]>,
   ): Promise<Instance<Entity<D>>>;
   update(
-    key: Partial<z.infer<D["schema"]>>,
+    key: TableKey<D["table"]["definition"]["indexes"]["table"]>,
     patch: Partial<z.infer<D["schema"]>>,
   ): Promise<Instance<Entity<D>>>;
 };

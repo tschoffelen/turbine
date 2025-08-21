@@ -73,6 +73,7 @@ const users = defineEntity({
   console.log(randyByEmail?.name);
 
   const allRandys = await users.queryAll({
+    index: "type_ssssssss",
     email: "randy@example.com",
   });
 
