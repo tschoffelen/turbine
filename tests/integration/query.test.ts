@@ -63,4 +63,34 @@ describe("integration: queries and pagination", () => {
     });
     expect(found?.id).toBe(c.id);
   });
+
+  it("throws when specifying an invalid index name on query", async () => {
+    await expect(
+      comment.query({
+        pk: ["post", "123"],
+        sk: { beginsWith: "comment" },
+        index: "invalid-index",
+      }),
+    ).rejects.toThrow('Index with name "invalid-index" is not defined');
+  });
+
+  it("throws when hashKey of specified index is not provided", async () => {
+    await expect(
+      comment.query({
+        pk: ["post", "123"],
+        sk: { beginsWith: "comment" },
+        index: "gsi1",
+      }),
+    ).rejects.toThrow('No value found for hash key "type"');
+  });
+
+  it("throws when hashKey expression is not equals", async () => {
+    await expect(
+      comment.query({
+        type: { beginsWith: "comment" },
+        sk: { beginsWith: "comment" },
+        index: "gsi1",
+      }),
+    ).rejects.toThrow("Query key condition not supported");
+  });
 });
