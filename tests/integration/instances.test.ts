@@ -25,11 +25,15 @@ describe("integration: instances", () => {
     });
     expect(found?.title).toBe("Don't read me");
 
+    await found?.update({
+      title: "Read me again",
+    });
+
     const found2 = await post.queryOne({
       index: "gsi3",
       gsi2pk: "post#id",
       gsi2sk: id,
     });
-    expect(found2?.title).toBe("Don't read me");
+    expect(found2?.title).toBe("Read me again");
   });
 });
