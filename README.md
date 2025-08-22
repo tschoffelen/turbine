@@ -1,5 +1,7 @@
 # Turbine 🪭
 
+[![NPM](https://img.shields.io/npm/v/dynamodb-turbine)](https://npmjs.com/package/dynamodb-turbine) ![License](https://img.shields.io/npm/l/dynamodb-turbine)
+
 Entity mapping and query helpers for DynamoDB using Zod schemas and the AWS SDK v3. Define your table and entities once, then put, get, update, and query with type-safe objects.
 
 - Small, direct, and type-friendly
