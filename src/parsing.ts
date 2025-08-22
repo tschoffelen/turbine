@@ -10,6 +10,7 @@ import {
   KeyConditionPrimitiveValue,
   PagedResult,
   QueryKey,
+  TableKey,
 } from "./types/entity";
 import { KeyDefinitionPrimitive } from "./types/key";
 
@@ -144,8 +145,24 @@ export const parseInstance = async <D extends EntityDefinition<z.ZodObject>>(
 ): Promise<Instance<Entity<D>>> => {
   const result = await definition.schema.parseAsync(input);
 
-  result.update = async (patch: Partial<z.infer<D["schema"]>>) =>
-    entity.update(input as Partial<z.infer<D["schema"]>>, patch);
+  result.update = async (patch: Partial<z.infer<D["schema"]>>) => {
+    const index = definition.table.definition.indexes.table;
+    const typedInput = input as Record<string, KeyDefinitionPrimitive>;
+
+    const updated = await entity.update(
+      (index.rangeKey
+        ? {
+            [index.hashKey]: typedInput[index.hashKey],
+            [index.rangeKey]: typedInput[index.rangeKey],
+          }
+        : {
+            [index.hashKey]: typedInput[index.hashKey],
+          }) as TableKey<D["table"]["definition"]["indexes"]["table"]>,
+      patch,
+    );
+    Object.assign(result, updated);
+    return updated;
+  };
 
   return result as Instance<Entity<D>>;
 };
