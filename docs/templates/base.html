@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ config.title }}{% endblock %}</title>
+  <meta name="description" content="{{ config.description }}">
+  <link rel="stylesheet" href="{{ get_url(path='style.css') }}">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a href="{{ get_url(path='/') }}" class="logo">Turbine</a>
+      <p class="tagline">DynamoDB made simple</p>
+    </div>
+    <ul class="nav-links">
+      <li><a href="{{ get_url(path='/quick-start') }}">Quick Start</a></li>
+      <li><a href="{{ get_url(path='/tables') }}">Tables</a></li>
+      <li><a href="{{ get_url(path='/entities') }}">Entities</a></li>
+      <li><a href="{{ get_url(path='/crud') }}">CRUD Operations</a></li>
+      <li><a href="{{ get_url(path='/querying') }}">Querying</a></li>
+      <li><a href="{{ get_url(path='/typescript') }}">TypeScript</a></li>
+      <li><a href="{{ get_url(path='/key-patterns') }}">Key Patterns</a></li>
+      <li><a href="{{ get_url(path='/errors') }}">Error Handling</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="https://github.com/tschoffelen/turbine" target="_blank">GitHub</a>
+      <a href="https://www.npmjs.com/package/dynamodb-turbine" target="_blank">NPM</a>
+    </div>
+  </nav>
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

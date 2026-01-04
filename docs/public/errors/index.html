@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error Handling - Turbine</title>
+  <meta name="description" content="Type-safe entity mapping and query library for DynamoDB">
+  <link rel="stylesheet" href="https://tschoffelen.github.io/turbine/style.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a href="https://tschoffelen.github.io/turbine" class="logo">Turbine</a>
+      <p class="tagline">DynamoDB made simple</p>
+    </div>
+    <ul class="nav-links">
+      <li><a href="https://tschoffelen.github.io/turbine/quick-start">Quick Start</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/tables">Tables</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/entities">Entities</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/crud">CRUD Operations</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/querying">Querying</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/typescript">TypeScript</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/key-patterns">Key Patterns</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/errors">Error Handling</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="https://github.com/tschoffelen/turbine" target="_blank">GitHub</a>
+      <a href="https://www.npmjs.com/package/dynamodb-turbine" target="_blank">npm</a>
+    </div>
+  </nav>
+  <main class="content">
+    
+<article>
+  <h1>Error Handling</h1>
+  <p>Turbine provides a custom error class and clear error messages to help you debug issues.</p>
+<h2 id="turbineerror">TurbineError</h2>
+<p>All Turbine-specific errors are instances of <code>TurbineError</code>:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">import </span><span>{ </span><span style="color:#e06c75;">TurbineError </span><span>} </span><span style="color:#c678dd;">from </span><span style="color:#98c379;">&quot;dynamodb-turbine&quot;</span><span>;
+</span><span>
+</span><span style="color:#c678dd;">try </span><span>{
+</span><span>  </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({ id: </span><span style="color:#98c379;">&quot;123&quot; </span><span>}); </span><span style="font-style:italic;color:#5c6370;">// Missing required field
+</span><span>} </span><span style="color:#c678dd;">catch </span><span>(</span><span style="color:#e06c75;">error</span><span>) {
+</span><span>  </span><span style="color:#c678dd;">if </span><span>(</span><span style="color:#e06c75;">error </span><span>instanceof TurbineError) {
+</span><span>    </span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">error</span><span>(</span><span style="color:#98c379;">&quot;Turbine error:&quot;</span><span>, </span><span style="color:#e06c75;">error</span><span>.</span><span style="color:#e06c75;">message</span><span>);
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<h2 id="common-error-scenarios">Common Error Scenarios</h2>
+<h3 id="schema-validation-errors">Schema Validation Errors</h3>
+<p>When data doesn't match your Zod schema:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">users </span><span>= </span><span style="color:#61afef;">defineEntity</span><span>({
+</span><span>  </span><span style="color:#e06c75;">table</span><span>,
+</span><span>  schema: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">object</span><span>({
+</span><span>    id: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>(),
+</span><span>    email: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>().</span><span style="color:#61afef;">email</span><span>(),
+</span><span>    age: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">number</span><span>().</span><span style="color:#61afef;">min</span><span>(</span><span style="color:#d19a66;">0</span><span>),
+</span><span>  }),
+</span><span>  keys: { </span><span style="font-style:italic;color:#5c6370;">/* ... */ </span><span>},
+</span><span>});
+</span><span>
+</span><span style="font-style:italic;color:#5c6370;">// Missing required field
+</span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({ id: </span><span style="color:#98c379;">&quot;123&quot; </span><span>});
+</span><span style="font-style:italic;color:#5c6370;">// Error: Required field &#39;email&#39; is missing
+</span><span>
+</span><span style="font-style:italic;color:#5c6370;">// Invalid email format
+</span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({ id: </span><span style="color:#98c379;">&quot;123&quot;</span><span>, email: </span><span style="color:#98c379;">&quot;not-an-email&quot; </span><span>});
+</span><span style="font-style:italic;color:#5c6370;">// Error: Invalid email
+</span><span>
+</span><span style="font-style:italic;color:#5c6370;">// Invalid number
+</span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({ id: </span><span style="color:#98c379;">&quot;123&quot;</span><span>, email: </span><span style="color:#98c379;">&quot;a@b.com&quot;</span><span>, age: -</span><span style="color:#d19a66;">5 </span><span>});
+</span><span style="font-style:italic;color:#5c6370;">// Error: Number must be greater than or equal to 0
+</span></code></pre>
+<h3 id="invalid-index">Invalid Index</h3>
+<p>When querying a non-existent index:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">table </span><span>= </span><span style="color:#61afef;">defineTable</span><span>({
+</span><span>  name: </span><span style="color:#98c379;">&quot;my-table&quot;</span><span>,
+</span><span>  indexes: {
+</span><span>    table: { hashKey: </span><span style="color:#98c379;">&quot;pk&quot;</span><span>, rangeKey: </span><span style="color:#98c379;">&quot;sk&quot; </span><span>},
+</span><span>    gsi1: { hashKey: </span><span style="color:#98c379;">&quot;type&quot; </span><span>},
+</span><span>  },
+</span><span>});
+</span><span>
+</span><span style="font-style:italic;color:#5c6370;">// Querying undefined index
+</span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">query</span><span>({
+</span><span>  index: </span><span style="color:#98c379;">&quot;gsi2&quot;</span><span>, </span><span style="font-style:italic;color:#5c6370;">// Does not exist
+</span><span>  </span><span style="font-style:italic;color:#5c6370;">// ...
+</span><span>});
+</span><span style="font-style:italic;color:#5c6370;">// Error: Index &#39;gsi2&#39; is not defined
+</span></code></pre>
+<h3 id="missing-key-fields">Missing Key Fields</h3>
+<p>When query keys don't match the index:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="font-style:italic;color:#5c6370;">// Index requires &#39;type&#39; as hash key
+</span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">query</span><span>({
+</span><span>  index: </span><span style="color:#98c379;">&quot;gsi1&quot;</span><span>,
+</span><span>  </span><span style="font-style:italic;color:#5c6370;">// Missing &#39;type&#39; field
+</span><span>});
+</span><span style="font-style:italic;color:#5c6370;">// Error: Missing required key &#39;type&#39; for index &#39;gsi1&#39;
+</span></code></pre>
+<h2 id="error-handling-patterns">Error Handling Patterns</h2>
+<h3 id="try-catch">Try-Catch</h3>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">async function </span><span style="color:#61afef;">createUser</span><span>(</span><span style="color:#e06c75;">data</span><span>: UserInput) {
+</span><span>  </span><span style="color:#c678dd;">try </span><span>{
+</span><span>    </span><span style="color:#c678dd;">return await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>(</span><span style="color:#e06c75;">data</span><span>);
+</span><span>  } </span><span style="color:#c678dd;">catch </span><span>(</span><span style="color:#e06c75;">error</span><span>) {
+</span><span>    </span><span style="color:#c678dd;">if </span><span>(</span><span style="color:#e06c75;">error </span><span>instanceof TurbineError) {
+</span><span>      </span><span style="font-style:italic;color:#5c6370;">// Handle validation or configuration errors
+</span><span>      </span><span style="color:#c678dd;">throw </span><span>new Error(</span><span style="color:#98c379;">`Invalid user data: ${</span><span style="color:#e06c75;">error</span><span style="color:#98c379;">.</span><span style="color:#e06c75;">message</span><span style="color:#98c379;">}`</span><span>);
+</span><span>    }
+</span><span>    </span><span style="font-style:italic;color:#5c6370;">// Re-throw other errors (network, permissions, etc.)
+</span><span>    </span><span style="color:#c678dd;">throw </span><span style="color:#e06c75;">error</span><span>;
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<h3 id="checking-existence">Checking Existence</h3>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">async function </span><span style="color:#61afef;">getUserOrThrow</span><span>(</span><span style="color:#e06c75;">id</span><span>: string) {
+</span><span>  </span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">user </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#56b6c2;">get</span><span>({
+</span><span>    pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#e06c75;">id</span><span>],
+</span><span>    sk: </span><span style="color:#98c379;">&quot;profile&quot;</span><span>,
+</span><span>  });
+</span><span>
+</span><span>  </span><span style="color:#c678dd;">if </span><span>(!</span><span style="color:#e06c75;">user</span><span>) {
+</span><span>    </span><span style="color:#c678dd;">throw </span><span>new Error(</span><span style="color:#98c379;">`User not found: ${</span><span style="color:#e06c75;">id</span><span style="color:#98c379;">}`</span><span>);
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#c678dd;">return </span><span style="color:#e06c75;">user</span><span>;
+</span><span>}
+</span></code></pre>
+<h3 id="handling-dynamodb-errors">Handling DynamoDB Errors</h3>
+<p>DynamoDB client errors are passed through:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">import </span><span>{ </span><span style="color:#e06c75;">ConditionalCheckFailedException </span><span>} </span><span style="color:#c678dd;">from </span><span style="color:#98c379;">&quot;@aws-sdk/client-dynamodb&quot;</span><span>;
+</span><span>
+</span><span style="color:#c678dd;">try </span><span>{
+</span><span>  </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>(</span><span style="color:#e06c75;">data</span><span>);
+</span><span>} </span><span style="color:#c678dd;">catch </span><span>(</span><span style="color:#e06c75;">error</span><span>) {
+</span><span>  </span><span style="color:#c678dd;">if </span><span>(</span><span style="color:#e06c75;">error </span><span>instanceof TurbineError) {
+</span><span>    </span><span style="font-style:italic;color:#5c6370;">// Turbine validation error
+</span><span>  } </span><span style="color:#c678dd;">else if </span><span>(</span><span style="color:#e06c75;">error </span><span>instanceof ConditionalCheckFailedException) {
+</span><span>    </span><span style="font-style:italic;color:#5c6370;">// DynamoDB condition failed
+</span><span>  } </span><span style="color:#c678dd;">else </span><span>{
+</span><span>    </span><span style="font-style:italic;color:#5c6370;">// Other errors (network, permissions)
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<h2 id="validation-before-operations">Validation Before Operations</h2>
+<p>Use Zod's parse methods for pre-validation:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">userSchema </span><span>= </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">object</span><span>({
+</span><span>  id: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>(),
+</span><span>  email: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>().</span><span style="color:#61afef;">email</span><span>(),
+</span><span>  name: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>(),
+</span><span>});
+</span><span>
+</span><span style="color:#c678dd;">function </span><span style="color:#61afef;">validateUserInput</span><span>(</span><span style="color:#e06c75;">data</span><span>: unknown) {
+</span><span>  </span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">result </span><span>= </span><span style="color:#e06c75;">userSchema</span><span>.</span><span style="color:#61afef;">safeParse</span><span>(</span><span style="color:#e06c75;">data</span><span>);
+</span><span>
+</span><span>  </span><span style="color:#c678dd;">if </span><span>(!</span><span style="color:#e06c75;">result</span><span>.</span><span style="color:#e06c75;">success</span><span>) {
+</span><span>    </span><span style="font-style:italic;color:#5c6370;">// Handle validation errors with detailed info
+</span><span>    </span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">errors </span><span>= </span><span style="color:#e06c75;">result</span><span>.</span><span style="color:#e06c75;">error</span><span>.</span><span style="color:#e06c75;">issues</span><span>.</span><span style="color:#61afef;">map</span><span>(</span><span style="color:#e06c75;">issue </span><span style="color:#c678dd;">=&gt; </span><span>({
+</span><span>      field: </span><span style="color:#e06c75;">issue</span><span>.</span><span style="color:#e06c75;">path</span><span>.</span><span style="color:#56b6c2;">join</span><span>(</span><span style="color:#98c379;">&quot;.&quot;</span><span>),
+</span><span>      message: </span><span style="color:#e06c75;">issue</span><span>.</span><span style="color:#e06c75;">message</span><span>,
+</span><span>    }));
+</span><span>    </span><span style="color:#c678dd;">return </span><span>{ success: </span><span style="color:#d19a66;">false</span><span>, </span><span style="color:#e06c75;">errors </span><span>};
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#c678dd;">return </span><span>{ success: </span><span style="color:#d19a66;">true</span><span>, data: </span><span style="color:#e06c75;">result</span><span>.data };
+</span><span>}
+</span></code></pre>
+<h2 id="debugging-tips">Debugging Tips</h2>
+<h3 id="enable-logging">Enable Logging</h3>
+<p>Log operations for debugging:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">async function </span><span style="color:#61afef;">putWithLogging</span><span>&lt;T&gt;(</span><span style="color:#e06c75;">entity</span><span>: Entity&lt;any&gt;, </span><span style="color:#e06c75;">data</span><span>: T) {
+</span><span>  </span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#98c379;">&quot;PUT:&quot;</span><span>, JSON.</span><span style="color:#56b6c2;">stringify</span><span>(</span><span style="color:#e06c75;">data</span><span>, </span><span style="color:#d19a66;">null</span><span>, </span><span style="color:#d19a66;">2</span><span>));
+</span><span>
+</span><span>  </span><span style="color:#c678dd;">try </span><span>{
+</span><span>    </span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">result </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">entity</span><span>.</span><span style="color:#61afef;">put</span><span>(</span><span style="color:#e06c75;">data</span><span>);
+</span><span>    </span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#98c379;">&quot;SUCCESS:&quot;</span><span>, </span><span style="color:#e06c75;">result</span><span>);
+</span><span>    </span><span style="color:#c678dd;">return </span><span style="color:#e06c75;">result</span><span>;
+</span><span>  } </span><span style="color:#c678dd;">catch </span><span>(</span><span style="color:#e06c75;">error</span><span>) {
+</span><span>    </span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">error</span><span>(</span><span style="color:#98c379;">&quot;ERROR:&quot;</span><span>, </span><span style="color:#e06c75;">error</span><span>);
+</span><span>    </span><span style="color:#c678dd;">throw </span><span style="color:#e06c75;">error</span><span>;
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<h3 id="check-key-values">Check Key Values</h3>
+<p>Verify generated keys:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">users </span><span>= </span><span style="color:#61afef;">defineEntity</span><span>({
+</span><span>  </span><span style="color:#e06c75;">table</span><span>,
+</span><span>  schema: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">object</span><span>({ </span><span style="font-style:italic;color:#5c6370;">/* ... */ </span><span>}),
+</span><span>  keys: {
+</span><span>    </span><span style="color:#61afef;">pk</span><span>: (</span><span style="color:#e06c75;">u</span><span>) </span><span style="color:#c678dd;">=&gt; </span><span>{
+</span><span>      </span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">key </span><span>= [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#e06c75;">u</span><span>.id];
+</span><span>      </span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#98c379;">&quot;Generated pk:&quot;</span><span>, </span><span style="color:#e06c75;">key</span><span>);
+</span><span>      </span><span style="color:#c678dd;">return </span><span style="color:#e06c75;">key</span><span>;
+</span><span>    },
+</span><span>    </span><span style="color:#61afef;">sk</span><span>: (</span><span style="color:#e06c75;">u</span><span>) </span><span style="color:#c678dd;">=&gt; </span><span style="color:#e06c75;">u</span><span>.</span><span style="color:#e06c75;">email</span><span>,
+</span><span>  },
+</span><span>});
+</span></code></pre>
+<h3 id="inspect-dynamodb-items">Inspect DynamoDB Items</h3>
+<p>Check what's actually stored:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">user </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({
+</span><span>  id: </span><span style="color:#98c379;">&quot;123&quot;</span><span>,
+</span><span>  email: </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>,
+</span><span>  name: </span><span style="color:#98c379;">&quot;Alice&quot;</span><span>,
+</span><span>});
+</span><span>
+</span><span style="font-style:italic;color:#5c6370;">// The instance includes all attributes
+</span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#98c379;">&quot;Stored item:&quot;</span><span>, {
+</span><span>  pk: </span><span style="color:#e06c75;">user</span><span>.</span><span style="color:#e06c75;">pk</span><span>,   </span><span style="font-style:italic;color:#5c6370;">// &quot;user#123&quot;
+</span><span>  sk: </span><span style="color:#e06c75;">user</span><span>.</span><span style="color:#e06c75;">sk</span><span>,   </span><span style="font-style:italic;color:#5c6370;">// &quot;alice@example.com&quot;
+</span><span>  id: </span><span style="color:#e06c75;">user</span><span>.id,
+</span><span>  email: </span><span style="color:#e06c75;">user</span><span>.</span><span style="color:#e06c75;">email</span><span>,
+</span><span>  name: </span><span style="color:#e06c75;">user</span><span>.name,
+</span><span>});
+</span></code></pre>
+<h2 id="error-reference">Error Reference</h2>
+<table><thead><tr><th>Error</th><th>Cause</th><th>Solution</th></tr></thead><tbody>
+<tr><td>Schema validation failed</td><td>Data doesn't match Zod schema</td><td>Check required fields, types, and constraints</td></tr>
+<tr><td>Index not defined</td><td>Query uses unknown index name</td><td>Verify index exists in <code>defineTable</code></td></tr>
+<tr><td>Missing key field</td><td>Query missing required key</td><td>Include all hash/range keys for the index</td></tr>
+<tr><td>Invalid key value</td><td>Key function returned invalid value</td><td>Check key functions return strings, numbers, or arrays</td></tr>
+</tbody></table>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="/quick-start">Quick Start</a> - Review the basics</li>
+<li><a href="/typescript">TypeScript</a> - Leverage type safety to prevent errors</li>
+</ul>
+
+</article>
+
+  </main>
+</body>
+</html>

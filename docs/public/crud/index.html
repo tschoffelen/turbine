@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRUD Operations - Turbine</title>
+  <meta name="description" content="Type-safe entity mapping and query library for DynamoDB">
+  <link rel="stylesheet" href="https://tschoffelen.github.io/turbine/style.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <a href="https://tschoffelen.github.io/turbine" class="logo">Turbine</a>
+      <p class="tagline">DynamoDB made simple</p>
+    </div>
+    <ul class="nav-links">
+      <li><a href="https://tschoffelen.github.io/turbine/quick-start">Quick Start</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/tables">Tables</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/entities">Entities</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/crud">CRUD Operations</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/querying">Querying</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/typescript">TypeScript</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/key-patterns">Key Patterns</a></li>
+      <li><a href="https://tschoffelen.github.io/turbine/errors">Error Handling</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="https://github.com/tschoffelen/turbine" target="_blank">GitHub</a>
+      <a href="https://www.npmjs.com/package/dynamodb-turbine" target="_blank">npm</a>
+    </div>
+  </nav>
+  <main class="content">
+    
+<article>
+  <h1>CRUD Operations</h1>
+  <p>Turbine provides simple methods for Create, Read, Update, and Delete operations.</p>
+<h2 id="create-put">Create: put()</h2>
+<p>The <code>put()</code> method creates a new item in DynamoDB:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">user </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({
+</span><span>  id: </span><span style="color:#98c379;">&quot;user-123&quot;</span><span>,
+</span><span>  email: </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>,
+</span><span>  name: </span><span style="color:#98c379;">&quot;Alice&quot;</span><span>,
+</span><span>});
+</span></code></pre>
+<h3 id="behavior">Behavior</h3>
+<ul>
+<li>Validates data against the Zod schema</li>
+<li>Applies default values from the schema</li>
+<li>Generates all key values</li>
+<li>Returns an Instance with the created data</li>
+</ul>
+<h3 id="with-defaults">With Defaults</h3>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">users </span><span>= </span><span style="color:#61afef;">defineEntity</span><span>({
+</span><span>  </span><span style="color:#e06c75;">table</span><span>,
+</span><span>  schema: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">object</span><span>({
+</span><span>    id: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>(),
+</span><span>    email: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>().</span><span style="color:#61afef;">email</span><span>(),
+</span><span>    role: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">enum</span><span>([</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;admin&quot;</span><span>]).</span><span style="color:#61afef;">default</span><span>(</span><span style="color:#98c379;">&quot;user&quot;</span><span>),
+</span><span>    createdAt: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>().</span><span style="color:#61afef;">datetime</span><span>().</span><span style="color:#61afef;">default</span><span>(() </span><span style="color:#c678dd;">=&gt; </span><span>new Date().</span><span style="color:#61afef;">toISOString</span><span>()),
+</span><span>  }),
+</span><span>  keys: { </span><span style="font-style:italic;color:#5c6370;">/* ... */ </span><span>},
+</span><span>});
+</span><span>
+</span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">user </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({
+</span><span>  id: </span><span style="color:#98c379;">&quot;123&quot;</span><span>,
+</span><span>  email: </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>,
+</span><span>});
+</span><span>
+</span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#e06c75;">user</span><span>.</span><span style="color:#e06c75;">role</span><span>);      </span><span style="font-style:italic;color:#5c6370;">// &quot;user&quot; (default)
+</span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#e06c75;">user</span><span>.</span><span style="color:#e06c75;">createdAt</span><span>); </span><span style="font-style:italic;color:#5c6370;">// &quot;2024-01-15T10:30:00.000Z&quot; (generated)
+</span></code></pre>
+<h3 id="overwrites-existing-items">Overwrites Existing Items</h3>
+<p><code>put()</code> will overwrite an existing item with the same keys:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="font-style:italic;color:#5c6370;">// Creates user
+</span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({ id: </span><span style="color:#98c379;">&quot;123&quot;</span><span>, email: </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>, name: </span><span style="color:#98c379;">&quot;Alice&quot; </span><span>});
+</span><span>
+</span><span style="font-style:italic;color:#5c6370;">// Overwrites the entire item
+</span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({ id: </span><span style="color:#98c379;">&quot;123&quot;</span><span>, email: </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>, name: </span><span style="color:#98c379;">&quot;Alice Smith&quot; </span><span>});
+</span></code></pre>
+<h2 id="read-get">Read: get()</h2>
+<p>The <code>get()</code> method fetches a single item by its primary key:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">user </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#56b6c2;">get</span><span>({
+</span><span>  pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;123&quot;</span><span>],
+</span><span>  sk: [</span><span style="color:#98c379;">&quot;profile&quot;</span><span>, </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>],
+</span><span>});
+</span><span>
+</span><span style="color:#c678dd;">if </span><span>(</span><span style="color:#e06c75;">user</span><span>) {
+</span><span>  </span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#e06c75;">user</span><span>.name);
+</span><span>}
+</span></code></pre>
+<h3 id="key-format">Key Format</h3>
+<p>Keys must match the format defined in your entity:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="font-style:italic;color:#5c6370;">// If your keys are defined as:
+</span><span>keys: {
+</span><span>  pk: (</span><span style="color:#e06c75;">u</span><span>) </span><span style="color:#c678dd;">=&gt; </span><span>[</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#e06c75;">u</span><span>.id],
+</span><span>  sk: (</span><span style="color:#e06c75;">u</span><span>) </span><span style="color:#c678dd;">=&gt; </span><span style="color:#e06c75;">u</span><span>.</span><span style="color:#e06c75;">email</span><span>,
+</span><span>}
+</span><span>
+</span><span style="font-style:italic;color:#5c6370;">// Then get() expects:
+</span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#56b6c2;">get</span><span>({
+</span><span>  pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;123&quot;</span><span>],  </span><span style="font-style:italic;color:#5c6370;">// Array format
+</span><span>  sk: </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>, </span><span style="font-style:italic;color:#5c6370;">// String format
+</span><span>});
+</span></code></pre>
+<h3 id="returns">Returns</h3>
+<ul>
+<li>Returns the Instance if found</li>
+<li>Returns <code>null</code> if not found</li>
+</ul>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">user </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#56b6c2;">get</span><span>({ pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;999&quot;</span><span>], sk: </span><span style="color:#98c379;">&quot;missing&quot; </span><span>});
+</span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#e06c75;">user</span><span>); </span><span style="font-style:italic;color:#5c6370;">// null
+</span></code></pre>
+<h2 id="update-update">Update: update()</h2>
+<p>There are two ways to update items:</p>
+<h3 id="entity-method">Entity Method</h3>
+<p>Use <code>entity.update(key, patch)</code> when you have the keys:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">updated </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">update</span><span>(
+</span><span>  { pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;123&quot;</span><span>], sk: </span><span style="color:#98c379;">&quot;alice@example.com&quot; </span><span>},
+</span><span>  { name: </span><span style="color:#98c379;">&quot;Alice Smith&quot;</span><span>, role: </span><span style="color:#98c379;">&quot;admin&quot; </span><span>}
+</span><span>);
+</span></code></pre>
+<h3 id="instance-method">Instance Method</h3>
+<p>Use <code>instance.update(patch)</code> for convenience when you have an instance:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">user </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#56b6c2;">get</span><span>({
+</span><span>  pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;123&quot;</span><span>],
+</span><span>  sk: </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>,
+</span><span>});
+</span><span>
+</span><span style="color:#c678dd;">if </span><span>(</span><span style="color:#e06c75;">user</span><span>) {
+</span><span>  </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">user</span><span>.</span><span style="color:#61afef;">update</span><span>({ name: </span><span style="color:#98c379;">&quot;Alice Smith&quot; </span><span>});
+</span><span>}
+</span></code></pre>
+<h3 id="update-behavior">Update Behavior</h3>
+<ul>
+<li>Only updates the specified fields</li>
+<li>Validates the patch data against the schema</li>
+<li>Returns the updated Instance</li>
+<li>Mutates the instance object in-place (for instance method)</li>
+</ul>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">const </span><span style="color:#e06c75;">user </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#56b6c2;">get</span><span>({ </span><span style="font-style:italic;color:#5c6370;">/* ... */ </span><span>});
+</span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#e06c75;">user</span><span>.name); </span><span style="font-style:italic;color:#5c6370;">// &quot;Alice&quot;
+</span><span>
+</span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">user</span><span>.</span><span style="color:#61afef;">update</span><span>({ name: </span><span style="color:#98c379;">&quot;Alice Smith&quot; </span><span>});
+</span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#e06c75;">user</span><span>.name); </span><span style="font-style:italic;color:#5c6370;">// &quot;Alice Smith&quot; (updated in-place)
+</span></code></pre>
+<h3 id="partial-updates">Partial Updates</h3>
+<p>Only the fields you specify are updated:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="font-style:italic;color:#5c6370;">// Original: { id: &quot;123&quot;, name: &quot;Alice&quot;, role: &quot;user&quot;, email: &quot;alice@example.com&quot; }
+</span><span>
+</span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">update</span><span>(
+</span><span>  { pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;123&quot;</span><span>], sk: </span><span style="color:#98c379;">&quot;alice@example.com&quot; </span><span>},
+</span><span>  { role: </span><span style="color:#98c379;">&quot;admin&quot; </span><span>}
+</span><span>);
+</span><span>
+</span><span style="font-style:italic;color:#5c6370;">// Result: { id: &quot;123&quot;, name: &quot;Alice&quot;, role: &quot;admin&quot;, email: &quot;alice@example.com&quot; }
+</span></code></pre>
+<h2 id="delete-delete">Delete: delete()</h2>
+<p>The <code>delete()</code> method removes an item:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#56b6c2;">delete</span><span>({
+</span><span>  pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;123&quot;</span><span>],
+</span><span>  sk: </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>,
+</span><span>});
+</span></code></pre>
+<h3 id="behavior-1">Behavior</h3>
+<ul>
+<li>Deletes the item if it exists</li>
+<li>Does nothing if the item doesn't exist (no error)</li>
+<li>Returns <code>void</code></li>
+</ul>
+<h2 id="error-handling">Error Handling</h2>
+<p>All operations can throw errors:</p>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">import </span><span>{ </span><span style="color:#e06c75;">TurbineError </span><span>} </span><span style="color:#c678dd;">from </span><span style="color:#98c379;">&quot;dynamodb-turbine&quot;</span><span>;
+</span><span>
+</span><span style="color:#c678dd;">try </span><span>{
+</span><span>  </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({ id: </span><span style="color:#98c379;">&quot;123&quot; </span><span>}); </span><span style="font-style:italic;color:#5c6370;">// Missing required &#39;email&#39;
+</span><span>} </span><span style="color:#c678dd;">catch </span><span>(</span><span style="color:#e06c75;">error</span><span>) {
+</span><span>  </span><span style="color:#c678dd;">if </span><span>(</span><span style="color:#e06c75;">error </span><span>instanceof TurbineError) {
+</span><span>    </span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">error</span><span>(</span><span style="color:#98c379;">&quot;Validation failed:&quot;</span><span>, </span><span style="color:#e06c75;">error</span><span>.</span><span style="color:#e06c75;">message</span><span>);
+</span><span>  }
+</span><span>}
+</span></code></pre>
+<p>Common errors:</p>
+<ul>
+<li>Schema validation failures</li>
+<li>Invalid key configurations</li>
+<li>DynamoDB client errors</li>
+</ul>
+<h2 id="complete-example">Complete Example</h2>
+<pre data-lang="typescript" style="background-color:#282c34;color:#abb2bf;" class="language-typescript "><code class="language-typescript" data-lang="typescript"><span style="color:#c678dd;">import </span><span>{ </span><span style="color:#e06c75;">defineTable</span><span>, </span><span style="color:#e06c75;">defineEntity </span><span>} </span><span style="color:#c678dd;">from </span><span style="color:#98c379;">&quot;dynamodb-turbine&quot;</span><span>;
+</span><span style="color:#c678dd;">import </span><span>{ </span><span style="color:#e06c75;">z </span><span>} </span><span style="color:#c678dd;">from </span><span style="color:#98c379;">&quot;zod&quot;</span><span>;
+</span><span>
+</span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">table </span><span>= </span><span style="color:#61afef;">defineTable</span><span>({
+</span><span>  name: </span><span style="color:#98c379;">&quot;app-data&quot;</span><span>,
+</span><span>  indexes: {
+</span><span>    table: { hashKey: </span><span style="color:#98c379;">&quot;pk&quot;</span><span>, rangeKey: </span><span style="color:#98c379;">&quot;sk&quot; </span><span>},
+</span><span>  },
+</span><span>});
+</span><span>
+</span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">users </span><span>= </span><span style="color:#61afef;">defineEntity</span><span>({
+</span><span>  </span><span style="color:#e06c75;">table</span><span>,
+</span><span>  schema: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">object</span><span>({
+</span><span>    id: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>(),
+</span><span>    email: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>().</span><span style="color:#61afef;">email</span><span>(),
+</span><span>    name: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>(),
+</span><span>    role: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">enum</span><span>([</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;admin&quot;</span><span>]).</span><span style="color:#61afef;">default</span><span>(</span><span style="color:#98c379;">&quot;user&quot;</span><span>),
+</span><span>    createdAt: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>().</span><span style="color:#61afef;">datetime</span><span>().</span><span style="color:#61afef;">default</span><span>(() </span><span style="color:#c678dd;">=&gt; </span><span>new Date().</span><span style="color:#61afef;">toISOString</span><span>()),
+</span><span>    updatedAt: </span><span style="color:#e06c75;">z</span><span>.</span><span style="color:#61afef;">string</span><span>().</span><span style="color:#61afef;">datetime</span><span>().</span><span style="color:#61afef;">optional</span><span>(),
+</span><span>  }),
+</span><span>  keys: {
+</span><span>    </span><span style="color:#61afef;">pk</span><span>: (</span><span style="color:#e06c75;">u</span><span>) </span><span style="color:#c678dd;">=&gt; </span><span>[</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#e06c75;">u</span><span>.id],
+</span><span>    </span><span style="color:#61afef;">sk</span><span>: (</span><span style="color:#e06c75;">u</span><span>) </span><span style="color:#c678dd;">=&gt; </span><span>[</span><span style="color:#98c379;">&quot;profile&quot;</span><span>, </span><span style="color:#e06c75;">u</span><span>.</span><span style="color:#e06c75;">email</span><span>],
+</span><span>  },
+</span><span>});
+</span><span>
+</span><span style="color:#c678dd;">async function </span><span style="color:#61afef;">userWorkflow</span><span>() {
+</span><span>  </span><span style="font-style:italic;color:#5c6370;">// Create
+</span><span>  </span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">user </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">put</span><span>({
+</span><span>    id: </span><span style="color:#98c379;">&quot;user-123&quot;</span><span>,
+</span><span>    email: </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>,
+</span><span>    name: </span><span style="color:#98c379;">&quot;Alice&quot;</span><span>,
+</span><span>  });
+</span><span>  </span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#98c379;">&quot;Created:&quot;</span><span>, </span><span style="color:#e06c75;">user</span><span>.id);
+</span><span>
+</span><span>  </span><span style="font-style:italic;color:#5c6370;">// Read
+</span><span>  </span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">fetched </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#56b6c2;">get</span><span>({
+</span><span>    pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;user-123&quot;</span><span>],
+</span><span>    sk: [</span><span style="color:#98c379;">&quot;profile&quot;</span><span>, </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>],
+</span><span>  });
+</span><span>  </span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#98c379;">&quot;Fetched:&quot;</span><span>, </span><span style="color:#e06c75;">fetched</span><span>?.name);
+</span><span>
+</span><span>  </span><span style="font-style:italic;color:#5c6370;">// Update (entity method)
+</span><span>  </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#61afef;">update</span><span>(
+</span><span>    { pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;user-123&quot;</span><span>], sk: [</span><span style="color:#98c379;">&quot;profile&quot;</span><span>, </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>] },
+</span><span>    { role: </span><span style="color:#98c379;">&quot;admin&quot;</span><span>, updatedAt: new Date().</span><span style="color:#61afef;">toISOString</span><span>() }
+</span><span>  );
+</span><span>
+</span><span>  </span><span style="font-style:italic;color:#5c6370;">// Update (instance method)
+</span><span>  </span><span style="color:#c678dd;">const </span><span style="color:#e06c75;">current </span><span>= </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#56b6c2;">get</span><span>({
+</span><span>    pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;user-123&quot;</span><span>],
+</span><span>    sk: [</span><span style="color:#98c379;">&quot;profile&quot;</span><span>, </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>],
+</span><span>  });
+</span><span>  </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">current</span><span>?.</span><span style="color:#61afef;">update</span><span>({ name: </span><span style="color:#98c379;">&quot;Alice Smith&quot; </span><span>});
+</span><span>
+</span><span>  </span><span style="font-style:italic;color:#5c6370;">// Delete
+</span><span>  </span><span style="color:#c678dd;">await </span><span style="color:#e06c75;">users</span><span>.</span><span style="color:#56b6c2;">delete</span><span>({
+</span><span>    pk: [</span><span style="color:#98c379;">&quot;user&quot;</span><span>, </span><span style="color:#98c379;">&quot;user-123&quot;</span><span>],
+</span><span>    sk: [</span><span style="color:#98c379;">&quot;profile&quot;</span><span>, </span><span style="color:#98c379;">&quot;alice@example.com&quot;</span><span>],
+</span><span>  });
+</span><span>  </span><span style="color:#e5c07b;">console</span><span>.</span><span style="color:#56b6c2;">log</span><span>(</span><span style="color:#98c379;">&quot;Deleted&quot;</span><span>);
+</span><span>}
+</span></code></pre>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="/querying">Querying</a> - Query multiple items</li>
+<li><a href="/typescript">TypeScript</a> - Type safety with Instance types</li>
+</ul>
+
+</article>
+
+  </main>
+</body>
+</html>
