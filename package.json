@@ -31,10 +31,10 @@
   "bugs": {
     "url": "https://github.com/tschoffelen/turbine/issues"
   },
-  "homepage": "https://github.com/tschoffelen/turbine#readme",
+  "homepage": "https://turbine.js.org",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.864.0",
-    "@aws-sdk/lib-dynamodb": "^3.864.0"
+    "@aws-sdk/client-dynamodb": "^3.962.0",
+    "@aws-sdk/lib-dynamodb": "^3.962.0"
   },
   "peerDependencies": {
     "zod": ">=4.0.0"
