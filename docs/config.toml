@@ -1,5 +1,5 @@
 # Turbine Documentation - Zola Configuration
-base_url = "https://tschoffelen.github.io/turbine"
+base_url = "https://turbine.js.org/"
 title = "Turbine"
 description = "Type-safe entity mapping and query library for DynamoDB"
 compile_sass = false
