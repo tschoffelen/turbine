@@ -29,6 +29,14 @@ jobs:
         with:
           tool: zola@0.20.0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate llms.txt
+        run: node docs/build-llms-txt.mjs
+
       - name: Build documentation
         run: zola build
         working-directory: docs

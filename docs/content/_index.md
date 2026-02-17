@@ -80,3 +80,5 @@ const recentUsers = await users.queryAll({
 - [Tables](/tables) - Learn about table configuration
 - [Entities](/entities) - Define your data models
 - [Querying](/querying) - Master DynamoDB queries
+
+_LLMs: [go here](/llms.txt) to find the full documentation as a text file._
