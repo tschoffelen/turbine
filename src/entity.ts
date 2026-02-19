@@ -90,10 +90,11 @@ export const defineEntity = <S extends z.ZodObject>(
     return items;
   };
 
-  entity.get = async (key) => {
+  entity.get = async (key, options) => {
     key.index = "table";
     const [, Key] = await resolveIndex(definition, key);
     const { Item } = await definition.table.get({
+      ...options,
       Key: resolveKeyValues(Key),
     });
 

@@ -1,4 +1,4 @@
-import { QueryCommandInput } from "@aws-sdk/lib-dynamodb";
+import { GetCommandInput, QueryCommandInput } from "@aws-sdk/lib-dynamodb";
 import { z } from "zod";
 
 import { KeyDefinition } from "./key";
@@ -90,6 +90,7 @@ export type Entity<D extends EntityDefinition<z.ZodObject>> = {
   definition: D;
   get(
     key: TableKey<D["table"]["definition"]["indexes"]["table"]>,
+    options?: Omit<GetCommandInput, "TableName" | "Key">,
   ): Promise<Instance<Entity<D>> | null>;
   query(key: QueryKey<D>, options?: QueryOptions<D>): Promise<PagedResult<D>>;
   queryOne(
