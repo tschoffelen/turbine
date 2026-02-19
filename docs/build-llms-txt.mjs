@@ -55,5 +55,3 @@ const parts = [
 ];
 
 await writeFile(OUTPUT, parts.join("\n"));
-
-console.log(`Generated ${OUTPUT} (${Buffer.byteLength(parts.join("\n"))} bytes)`);
