@@ -37,31 +37,42 @@ export const defineTable = (definition: TableDefinition): Table => {
     throw new TurbineError("Specify at least one index called 'table'");
   }
 
+  const log = (operation: string, params: Record<string, unknown>) => {
+    if (definition.debug) {
+      console.info(`✦ DDB ${definition.name}:${operation}`, params);
+    }
+  };
+
   const put = (params: Omit<PutCommandInput, "TableName">) => {
+    log("put", params);
     return client.send(
       new PutCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const update = (params: Omit<UpdateCommandInput, "TableName">) => {
+    log("update", params);
     return client.send(
       new UpdateCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const get = (params: Omit<GetCommandInput, "TableName">) => {
+    log("get", params);
     return client.send(
       new GetCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const deleteItem = (params: Omit<DeleteCommandInput, "TableName">) => {
+    log("delete", params);
     return client.send(
       new DeleteCommand({ ...params, TableName: definition.name }),
     );
   };
 
   const query = (params: Omit<QueryCommandInput, "TableName">) => {
+    log("query", params);
     return client.send(
       new QueryCommand({ ...params, TableName: definition.name }),
     );

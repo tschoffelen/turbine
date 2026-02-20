@@ -20,6 +20,7 @@ export type TableIndexDefinition = {
 export type TableDefinition = {
   documentClient?: DynamoDBDocumentClient;
   name: string;
+  debug?: boolean;
   indexes: {
     table: TableIndexDefinition;
     [indexName: string]: TableIndexDefinition;
