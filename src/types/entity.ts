@@ -20,6 +20,7 @@ export type EntityDefinition<
   table: Table<TableDefinition<TI, IX>>;
   schema: S;
   computed?: D;
+  strictReads?: boolean;
 };
 
 export type PagedResult<

@@ -148,8 +148,13 @@ export const parseInstance = async <D extends EntityDefinition>(
   definition: D,
   entity: Entity<D>,
   input: unknown,
+  applyStrict: boolean = true,
 ): Promise<Instance<Entity<D>>> => {
-  const result = await definition.schema.parseAsync(input);
+  const schema = definition.strictReads && applyStrict
+    ? definition.schema.strict()
+    : definition.schema.strip();
+
+  const result = await schema.parseAsync(input);
 
   result.update = async (patch: any) => {
     const index = definition.table.definition.tableIndex;
