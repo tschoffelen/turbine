@@ -148,10 +148,11 @@ export const parseInstance = async <D extends EntityDefinition>(
   definition: D,
   entity: Entity<D>,
   input: unknown,
+  applyStrict: boolean = true,
 ): Promise<Instance<Entity<D>>> => {
-  const schema = definition.strictReads
+  const schema = definition.strictReads && applyStrict
     ? definition.schema.strict()
-    : definition.schema;
+    : definition.schema.strip();
 
   const result = await schema.parseAsync(input);
 

@@ -56,6 +56,24 @@ describe("strictReads", () => {
     expect(user).toEqual({ ...storedItem, update: expect.any(Function) });
   });
 
+  it("strips unknown keys even on strict schemas", async () => {
+    const users = defineEntity({
+      table,
+      schema: z.strictObject({
+        id: z.string(),
+        name: z.string(),
+        pk: z.string(),
+        sk: z.string(),
+      }),
+      strictReads: false,
+    });
+    mockStoredItem({ ...storedItem, legacyField: "not in the schema" });
+
+    const user = await users.get(key);
+
+    expect(user).toEqual({ ...storedItem, update: expect.any(Function) });
+  });
+
   it("throws on unknown keys when strictReads is true", async () => {
     const users = defineEntity({ table, schema, strictReads: true });
     mockStoredItem({ ...storedItem, legacyField: "not in the schema" });

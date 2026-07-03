@@ -37,7 +37,7 @@ export const defineEntity = <
 
     await definition.table.put({ Item: payload, ...condition });
 
-    return parseInstance(definition, entity, payload);
+    return parseInstance(definition, entity, payload, false);
   };
 
   entity.update = async (key, patch, options) => {
@@ -68,7 +68,7 @@ export const defineEntity = <
       ReturnValues: ReturnValue.ALL_NEW,
     });
 
-    return parseInstance(definition, entity, Attributes);
+    return parseInstance(definition, entity, Attributes, false);
   };
 
   entity.query = async (key, options) => {
