@@ -33,6 +33,7 @@ The `defineEntity` function accepts:
 | `table` | `Table` | Yes | The table from `defineTable` |
 | `schema` | `z.ZodObject` | Yes | A Zod object schema |
 | `computed` | `object` | No | Computed field definitions |
+| `strictReads` | `boolean` | No | Throw when items read from the table contain keys that aren't in the schema. Defaults to `false`, where unknown keys are silently stripped. |
 
 ## Schema Definition
 
