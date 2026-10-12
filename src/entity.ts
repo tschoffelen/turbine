@@ -70,10 +70,18 @@ export const defineEntity = <S extends z.ZodObject>(
     return parsePagedResult(definition, entity, Items, LastEvaluatedKey, next);
   };
 
-  entity.queryOne = (key, options) => {
-    return entity
-      .query(key, { Limit: 1, ...options })
-      .then((result) => result[0] || null);
+  entity.queryOne = async (key, options) => {
+    // DynamoDB applies `Limit` before filters, so with filters we can't stop
+    // after the first evaluated item; keep paging until something matches.
+    let result = await entity.query(
+      key,
+      options?.filters ? options : { Limit: 1, ...options },
+    );
+    while (!result.length && result.next) {
+      result = await result.next();
+    }
+
+    return result[0] || null;
   };
 
   entity.queryAll = async (key, options) => {

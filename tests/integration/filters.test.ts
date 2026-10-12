@@ -32,6 +32,59 @@ describe("integration: filters", () => {
     expect(results[0].title).toBe("Hello Moon!");
   });
 
+  it("queryOne skips items excluded by filters", async () => {
+    const runId = uuid();
+
+    // p1 sorts first, but is filtered out
+    await post.put({
+      id: `${runId}-p1`,
+      authorId: runId,
+      title: `Hello World!`,
+      deletedAt: new Date().toISOString(),
+    });
+    await post.put({
+      id: `${runId}-p2`,
+      authorId: runId,
+      title: `Hello Moon!`,
+    });
+
+    const result = await post.queryOne(
+      { pk: ["user", runId] },
+      {
+        filters: {
+          deletedAt: { notExists: true },
+        },
+      },
+    );
+
+    expect(result?.id).toBe(`${runId}-p2`);
+  });
+
+  it("queryOne pages through filtered results with an explicit Limit", async () => {
+    const runId = uuid();
+
+    for (let i = 1; i <= 3; i++) {
+      await post.put({
+        id: `${runId}-p${i}`,
+        authorId: runId,
+        title: `Post ${i}`,
+        ...(i < 3 ? { deletedAt: new Date().toISOString() } : {}),
+      });
+    }
+
+    const result = await post.queryOne(
+      { pk: ["user", runId] },
+      {
+        Limit: 1,
+        filters: {
+          deletedAt: { notExists: true },
+        },
+      },
+    );
+
+    expect(result?.id).toBe(`${runId}-p3`);
+  });
+
   it("filters posts by title", async () => {
     const runId = uuid();
 
