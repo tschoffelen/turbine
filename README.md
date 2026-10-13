@@ -157,6 +157,34 @@ Query options match DynamoDB’s `QueryCommandInput` (minus the expression field
 - Inputs are validated by your Zod schema (defaults apply too).
 - Returned instances are typed and include an `update(patch)` helper that delegates to `entity.update`.
 
+## Migrations
+
+Turbine ships a small runner for data migrations (backfills, seed data, cleanups). Each migration is a file in `./migrations` that default-exports a class extending `Migration`, and applied migrations are recorded in your table:
+
+```ts
+// scripts/migrate.ts – run with `npx tsx scripts/migrate.ts [up|down|redo|new <name>]`
+import { defineMigrations } from "dynamodb-turbine";
+
+defineMigrations({ table }).cli();
+```
+
+```ts
+// migrations/2026-01-15-add-user-type.ts
+import { Migration } from "dynamodb-turbine";
+
+export default class AddUserType extends Migration {
+  async up() {
+    await this.forEachItem(table, { index: "type_sk", type: "user" }, (item) =>
+      users.update({ pk: item.pk, sk: item.sk }, { name: item.name ?? "" }),
+    );
+  }
+
+  async down() {}
+}
+```
+
+See the [migrations docs](https://turbine.js.org/migrations) for options such as a custom `schema` and `keys` for the migration records.
+
 ## Error handling
 
 Invalid input or unresolved keys throw an error. Ensure required fields for the index you target are provided (for example, missing `pk` or `sk` parts in your derived keys).

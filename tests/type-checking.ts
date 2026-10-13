@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { defineTable, defineEntity } from "../src";
+import { defineTable, defineEntity, defineMigrations } from "../src";
 
 const table = defineTable({
   name: "my-dynamodb-table",
@@ -100,3 +100,18 @@ const users = defineEntity({
   console.log(allUsers.length);
   console.log(allUsers[0]?.name);
 })();
+
+defineMigrations({
+  table,
+  directory: "./migrations",
+  schema: z.object({
+    id: z.string(),
+    appliedAt: z.iso.datetime().optional(),
+    appliedBy: z.string().default(() => process.env.USER || "unknown"),
+  }),
+  keys: {
+    pk: (migration) => ["migration", migration.id],
+    sk: "migration",
+    type: "migration",
+  },
+}).cli();

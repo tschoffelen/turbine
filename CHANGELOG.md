@@ -15,6 +15,7 @@
 - **`and`/`or` filter groups**: Filters and conditions can be nested boolean groups, e.g. `{ or: [{ status: "draft" }, { and: [{ views: { greaterThan: 100 } }, { deletedAt: { notExists: true } }] }] }`.
 - **Nested filter paths**: Filters and conditions can target nested attributes using dot notation, e.g. `{ "metadata.category": { equals: "tech" } }`, with type-safe path suggestions up to three levels deep.
 - **`strictReads` option**: `defineEntity({ ..., strictReads: true })` makes reads throw when a stored item contains keys that aren't in the schema. Defaults to `false`, where unknown keys are silently stripped.
+- **Migrations**: `defineMigrations()` and the `Migration` base class run file-based data migrations, tracking applied migrations in your table. The schema and keys of the migration records are configurable.
 - **Schema input types for `put()`**: `put` now accepts the schema's input type (`z.input`), so fields with defaults or transforms no longer need to be provided.
 
 ### Other changes
